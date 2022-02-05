@@ -6,8 +6,12 @@ Spawn_Canister -> Video_Canister ** : create
 return canister_principal
 
 loop chunk_num times
-    Package ->> Video_Canister ++: put_chunk(#, chunk)
-    deactivate Video_Canister
+Package ->> Video_Canister ++: put_chunk
+deactivate Video_Canister
+end
+
+opt remember
+    Package ->> Index ++: post_video
 end
 
 Package --> User: canister_principal
