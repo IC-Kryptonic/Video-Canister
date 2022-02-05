@@ -1,0 +1,8 @@
+@startuml
+User -> Package ++: get_identity_videos
+
+Package -> Index_Canister ++: get_identity_videos
+return video_principals
+
+Package --> User: video_principals
+@enduml

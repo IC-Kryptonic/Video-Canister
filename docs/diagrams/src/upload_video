@@ -11,7 +11,7 @@ deactivate Video_Canister
 end
 
 opt remember
-    Package ->> Index ++: post_video
+    Package ->> Index_Canister ++: post_video
 end
 
 Package --> User: canister_principal
