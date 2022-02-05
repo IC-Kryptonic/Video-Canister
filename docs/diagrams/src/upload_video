@@ -11,4 +11,4 @@ loop chunk_num times
 end
 
 Package --> User: canister_principal
-@endumls
+@enduml
