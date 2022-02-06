@@ -1,4 +1,7 @@
 @startuml
+
+Actor User
+
 User -> Package ++: get_video
 
 Package -> Video_Canister ++: get_meta_info

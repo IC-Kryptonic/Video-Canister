@@ -1,4 +1,7 @@
 @startuml
+
+Actor User
+
 User -> Package ++: get_identity_videos
 
 Package -> Index_Canister ++: get_identity_videos

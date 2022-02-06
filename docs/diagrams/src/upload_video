@@ -1,4 +1,7 @@
 @startuml
+
+Actor User
+
 User -> Package ++: upload_video
 Package -> Spawn_Canister ++: create_new_canister
 
