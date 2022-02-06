@@ -30,9 +30,17 @@ type PutChunkResponse = variant {
     out_of_bounds;
 }
 
+type CahngeOwnerResponse = variant {
+    success;
+
+    missing_rights;
+}
+
 service : (principal) -> {
     "put_meta_info": (PutMetaInfo) -> (PutMetaInfoResponse);
     "put_chunk": (nat, Chunk) -> (PutChunkResponse);
     "get_meta_info": () -> (MetaInfo) query;
     "get_chunk": (nat) -> (opt Chunk) query;
+
+    "change_owner": (principal) -> (CahngeOwnerResponse);
 }
