@@ -2,8 +2,8 @@
 
 Actor User
 
-User -> Package ++: change_owner
+User ->> Package ++: change_owner
 
-Package -> Video_Canister ++: change_owner
+Package ->> Video_Canister ++: change_owner
 
 @enduml
