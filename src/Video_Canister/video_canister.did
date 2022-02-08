@@ -30,7 +30,7 @@ type PutChunkResponse = variant {
     out_of_bounds;
 }
 
-type CahngeOwnerResponse = variant {
+type ChangeOwnerResponse = variant {
     success;
 
     missing_rights;
@@ -42,5 +42,5 @@ service : (principal) -> {
     "get_meta_info": () -> (MetaInfo) query;
     "get_chunk": (nat) -> (opt Chunk) query;
 
-    "change_owner": (principal) -> (CahngeOwnerResponse);
+    "change_owner": (principal) -> (ChangeOwnerResponse);
 }
