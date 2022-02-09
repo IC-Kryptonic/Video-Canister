@@ -1,0 +1,11 @@
+type CreateCanisterResponse = variant {
+    //success
+    created: principal;
+
+    //not enough funds send
+    insufficient_funds;
+}
+
+service : () -> {
+    "create_new_canister": () -> CreateCanisterResponse;
+}

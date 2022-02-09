@@ -1,0 +1,11 @@
+@startuml
+
+Actor User
+
+User -> Package ++: get_my_videos
+
+Package -> Index_Canister ++: get_my_videos
+return video_principals
+
+Package --> User: video_principals
+@enduml

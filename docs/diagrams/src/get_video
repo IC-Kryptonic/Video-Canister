@@ -1,0 +1,16 @@
+@startuml
+
+Actor User
+
+User -> Package ++: get_video
+
+Package -> Video_Canister ++: get_meta_info
+return meta_info
+
+loop chunk_num times
+    Package -> Video_Canister ++: get_chunk
+    return chunk
+end
+
+Package --> User: video
+@enduml

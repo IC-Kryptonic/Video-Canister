@@ -1,0 +1,9 @@
+@startuml
+
+Actor User
+
+User ->> Package ++: change_owner
+
+Package ->> Video_Canister ++: change_owner
+
+@enduml
