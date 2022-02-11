@@ -72,3 +72,17 @@ pub async fn init(owner: Principal){
         owner,
     };
 }
+
+#[update]
+pub async fn put_meta_info(new_meta_info: PutMetaInfo) -> PutMetaInfoResponse{
+    let mut old_meta_info = storage::get_mut::<MetaInfo>();
+    if old_meta_info.owner != ic_cdk::caller() {
+        return PutMetaInfoResponse::MissingRights;
+    } else {
+        old_meta_info.name = new_meta_info.name;
+        old_meta_info.description = new_meta_info.description;
+        old_meta_info.chunk_num = new_meta_info.chunk_num;
+
+        return PutMetaInfoResponse::Success;
+    }
+}
