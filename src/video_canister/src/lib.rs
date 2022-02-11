@@ -60,6 +60,9 @@ enum ChangeOwnerResponse{
     MissingRights,
 }
 
+type Chunk = Vec<u8>;
+type Chunks = Vec<Chunk>;
+
 const CANISTER_VERSION: usize = 1usize;
 
 #[init]
@@ -81,8 +84,16 @@ pub async fn put_meta_info(new_meta_info: PutMetaInfo) -> PutMetaInfoResponse{
     } else {
         old_meta_info.name = new_meta_info.name;
         old_meta_info.description = new_meta_info.description;
-        old_meta_info.chunk_num = new_meta_info.chunk_num;
+
+        //Resize array
+        if old_meta_info.chunk_num != new_meta_info.chunk_num{
+            (*storage::get_mut::<Chunks>()).resize_with(new_meta_info.chunk_num, Vec::new());
+            old_meta_info.chunk_num = new_meta_info.chunk_num;
+        }
 
         return PutMetaInfoResponse::Success;
     }
 }
+
+#[update]
+pub async fn put_chunk()
