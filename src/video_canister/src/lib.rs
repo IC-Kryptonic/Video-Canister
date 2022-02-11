@@ -1,4 +1,6 @@
 use ic_cdk::export::candid::{CandidType, Deserialize, Principal};
+use ic_cdk_macros::{update, query, init};
+use ic_cdk::storage;
 
 #[derive(CandidType, Deserialize)]
 struct PutMetaInfo{
@@ -14,6 +16,18 @@ struct MetaInfo{
     pub chunk_num: usize,
     pub version: usize,
     pub owner: Principal,
+}
+
+impl Default for MetaInfo{
+    fn default() -> Self { 
+        MetaInfo{
+            name: String::new(),
+            description: String::new(),
+            chunk_num: 0,
+            version: CANISTER_VERSION,
+            owner: Principal::anonymous(),
+        }
+     }
 }
 
 #[derive(CandidType, Deserialize)]
@@ -46,3 +60,15 @@ enum ChangeOwnerResponse{
     MissingRights,
 }
 
+const CANISTER_VERSION: usize = 1usize;
+
+#[init]
+pub async fn init(owner: Principal){
+    *storage::get_mut::<MetaInfo>() = MetaInfo{
+        name: String::new(),
+        description: String::new(),
+        chunk_num: 0,
+        version: CANISTER_VERSION,
+        owner,
+    };
+}
