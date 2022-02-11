@@ -3,15 +3,6 @@
 version = 3
 
 [[package]]
-name = "Video_Canister"
-version = "0.1.0"
-dependencies = [
- "ic-cdk",
- "ic-cdk-macros",
- "ic-types",
-]
-
-[[package]]
 name = "aho-corasick"
 version = "0.7.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -873,6 +864,16 @@ name = "version_check"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
+
+[[package]]
+name = "video_canister"
+version = "0.1.0"
+dependencies = [
+ "candid",
+ "ic-cdk",
+ "ic-cdk-macros",
+ "serde",
+]
 
 [[package]]
 name = "wasi"

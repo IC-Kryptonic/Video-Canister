@@ -1,5 +1,5 @@
 [workspace]
 
 members = [
-    "src/Video_Canister"
+    "src/video_canister"
 ]
