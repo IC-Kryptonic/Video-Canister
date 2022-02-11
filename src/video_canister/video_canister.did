@@ -4,7 +4,7 @@ type PutMetaInfo = record {
     "name": text;
     "description": text;
     "chunk_num": nat;
-}
+};
 
 type MetaInfo = record {
     "name": text;
@@ -12,7 +12,7 @@ type MetaInfo = record {
     "chunk_num": nat;
     "version": nat;
     "owner": principal;
-}
+};
 
 type PutMetaInfoResponse = variant {
     //success
@@ -20,7 +20,7 @@ type PutMetaInfoResponse = variant {
 
     //Not the owner
     missing_rights;
-}
+};
 
 type PutChunkResponse = variant {
     //success
@@ -31,13 +31,13 @@ type PutChunkResponse = variant {
 
     //outside array range
     out_of_bounds;
-}
+};
 
 type ChangeOwnerResponse = variant {
     success;
 
     missing_rights;
-}
+};
 
 service : (principal) -> {
     "put_meta_info": (PutMetaInfo) -> (PutMetaInfoResponse);

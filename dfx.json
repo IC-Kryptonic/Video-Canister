@@ -1,27 +1,10 @@
 {
   "canisters": {
-    "Video_Canister": {
-      "main": "src/Video_Canister/main.mo",
-      "type": "motoko"
-    },
-    "Video_Canister_assets": {
-      "dependencies": [
-        "Video_Canister"
-      ],
-      "frontend": {
-        "entrypoint": "src/Video_Canister_assets/src/index.html"
-      },
-      "source": [
-        "src/Video_Canister_assets/assets",
-        "dist/Video_Canister_assets/"
-      ],
-      "type": "assets"
-    }
-  },
-  "defaults": {
-    "build": {
-      "args": "",
-      "packtool": ""
+    "video_canister": {
+      "build": "cargo build --target wasm32-unknown-unknown --package video_canister --release",
+      "candid": "src/video_canister/video_canister.did",
+      "wasm": "target/wasm32-unknown-unknown/release/video_canister.wasm",
+      "type": "custom"
     }
   },
   "dfx": "0.8.4",

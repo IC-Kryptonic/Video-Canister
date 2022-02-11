@@ -3,14 +3,14 @@ use ic_cdk_macros::{update, query, init};
 use ic_cdk::storage;
 
 #[derive(CandidType, Deserialize)]
-struct PutMetaInfo{
+pub struct PutMetaInfo{
     pub name: String,
     pub description: String,
     pub chunk_num: usize,
 }
 
 #[derive(CandidType, Deserialize)]
-struct MetaInfo{
+pub struct MetaInfo{
     pub name: String,
     pub description: String,
     pub chunk_num: usize,
@@ -31,7 +31,7 @@ impl Default for MetaInfo{
 }
 
 #[derive(CandidType, Deserialize)]
-enum PutMetaInfoResponse{
+pub enum PutMetaInfoResponse{
     #[serde(rename = "success")]
     Success,
 
@@ -40,7 +40,7 @@ enum PutMetaInfoResponse{
 }
 
 #[derive(CandidType, Deserialize)]
-enum PutChunkResponse{
+pub enum PutChunkResponse{
     #[serde(rename = "success")]
     Success,
 
@@ -52,7 +52,7 @@ enum PutChunkResponse{
 }
 
 #[derive(CandidType, Deserialize)]
-enum ChangeOwnerResponse{
+pub enum ChangeOwnerResponse{
     #[serde(rename = "success")]
     Success,
 
@@ -87,7 +87,7 @@ pub async fn put_meta_info(new_meta_info: PutMetaInfo) -> PutMetaInfoResponse{
 
         //Resize array
         if old_meta_info.chunk_num != new_meta_info.chunk_num{
-            (*storage::get_mut::<Chunks>()).resize_with(new_meta_info.chunk_num, Vec::new());
+            (*storage::get_mut::<Chunks>()).resize(new_meta_info.chunk_num, Vec::new());
             old_meta_info.chunk_num = new_meta_info.chunk_num;
         }
 
@@ -96,4 +96,18 @@ pub async fn put_meta_info(new_meta_info: PutMetaInfo) -> PutMetaInfoResponse{
 }
 
 #[update]
-pub async fn put_chunk()
+pub async fn put_chunk(chunk_num: usize, chunk: Chunk) -> PutChunkResponse{
+    let owner = (*storage::get::<MetaInfo>()).owner;
+    if owner != ic_cdk::caller() {
+        return PutChunkResponse::MissingRights;
+    } else {
+        let chunks = storage::get_mut::<Chunks>();
+
+        if chunks.len() >= chunk_num{
+            return PutChunkResponse::OutOfBounds;
+        }
+        
+        chunks[chunk_num] = chunk;
+        return PutChunkResponse::Success;
+    }
+}
