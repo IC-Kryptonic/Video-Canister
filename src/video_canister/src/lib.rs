@@ -111,3 +111,15 @@ pub async fn put_chunk(chunk_num: usize, chunk: Chunk) -> PutChunkResponse{
         return PutChunkResponse::Success;
     }
 }
+
+#[update]
+pub async fn change_owner(new_owner: Principal) -> ChangeOwnerResponse{
+    let mut old_owner = (*storage::get_mut::<MetaInfo>()).owner;
+
+    if old_owner != ic_cdk::caller() {
+        return ChangeOwnerResponse::MissingRights;
+    } else {
+        old_owner = new_owner;
+        return ChangeOwnerResponse::Success;
+    }
+}
