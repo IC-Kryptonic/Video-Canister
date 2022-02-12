@@ -67,13 +67,7 @@ const CANISTER_VERSION: usize = 1usize;
 
 #[init]
 pub async fn init(owner: Principal){
-    *storage::get_mut::<MetaInfo>() = MetaInfo{
-        name: String::new(),
-        description: String::new(),
-        chunk_num: 0,
-        version: CANISTER_VERSION,
-        owner,
-    };
+    storage::get_mut::<MetaInfo>().owner = owner;
 }
 
 #[update]
@@ -114,12 +108,22 @@ pub async fn put_chunk(chunk_num: usize, chunk: Chunk) -> PutChunkResponse{
 
 #[update]
 pub async fn change_owner(new_owner: Principal) -> ChangeOwnerResponse{
-    let mut old_owner = (*storage::get_mut::<MetaInfo>()).owner;
+    let old_owner = &mut storage::get_mut::<MetaInfo>().owner;
 
-    if old_owner != ic_cdk::caller() {
+    if *old_owner != ic_cdk::caller() {
         return ChangeOwnerResponse::MissingRights;
     } else {
-        old_owner = new_owner;
+        *old_owner = new_owner;
         return ChangeOwnerResponse::Success;
     }
+}
+
+#[query]
+pub async fn get_meta_info() -> &'static MetaInfo{
+    return storage::get::<MetaInfo>();
+}
+
+#[query]
+pub async fn get_chunk(chunk_num: usize) -> Option<&'static Chunk>{
+    return storage::get::<Chunks>().get(chunk_num);
 }
