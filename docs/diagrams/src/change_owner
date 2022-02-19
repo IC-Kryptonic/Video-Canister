@@ -5,5 +5,6 @@ Actor User
 User ->> Package ++: change_owner
 
 Package ->> Video_Canister ++: change_owner
+Package ->> Management_Canister ++: update_settings
 
 @enduml
