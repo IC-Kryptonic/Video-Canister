@@ -1,5 +1,5 @@
-use ic_cdk::export::candid::{CandidType, Deserialize, Principal};
-use ic_cdk_macros::{update, query, init};
+use ic_cdk::export::candid::{CandidType, Deserialize, Principal,};
+use ic_cdk_macros::{update, query, init, pre_upgrade, post_upgrade};
 use ic_cdk::storage;
 
 #[derive(CandidType, Deserialize)]
@@ -63,7 +63,7 @@ pub enum ChangeOwnerResponse{
 type Chunk = Vec<u8>;
 type Chunks = Vec<Chunk>;
 
-const CANISTER_VERSION: usize = 1usize;
+const CANISTER_VERSION: usize = 0usize;
 
 #[init]
 pub async fn init(owner: Principal){
@@ -112,7 +112,7 @@ pub async fn change_owner(new_owner: Principal) -> ChangeOwnerResponse{
 
     if *old_owner != ic_cdk::caller() {
         return ChangeOwnerResponse::MissingRights;
-    } else {
+    } else { 
         *old_owner = new_owner;
         return ChangeOwnerResponse::Success;
     }
@@ -126,4 +126,23 @@ pub async fn get_meta_info() -> &'static MetaInfo{
 #[query]
 pub async fn get_chunk(chunk_num: usize) -> Option<&'static Chunk>{
     return storage::get::<Chunks>().get(chunk_num);
+}
+
+#[pre_upgrade]
+fn pre_upgrade() {
+    let pair = (storage::get::<MetaInfo>(), storage::get::<Chunks>());
+    storage::stable_save((pair,)).unwrap();
+}
+
+#[post_upgrade]
+fn post_upgrade() {
+    let ((old_meta_info, chunks),): ((MetaInfo, Chunks),) = storage::stable_restore().unwrap();
+
+    let meta_info = storage::get_mut::<MetaInfo>();
+    meta_info.chunk_num = old_meta_info.chunk_num;
+    meta_info.description = old_meta_info.description;
+    meta_info.owner = old_meta_info.owner;
+    meta_info.name = old_meta_info.name;
+
+    let _ = std::mem::replace(storage::get_mut::<Chunks>(), chunks);
 }
