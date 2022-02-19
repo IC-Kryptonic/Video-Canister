@@ -81,7 +81,7 @@ pub async fn put_meta_info(new_meta_info: PutMetaInfo) -> PutMetaInfoResponse{
 
         //Resize array
         if old_meta_info.chunk_num != new_meta_info.chunk_num{
-            (*storage::get_mut::<Chunks>()).resize(new_meta_info.chunk_num, Vec::new());
+            let _old_chunks = std::mem::replace(storage::get_mut::<Chunks>(), vec![Vec::new(); new_meta_info.chunk_num]);
             old_meta_info.chunk_num = new_meta_info.chunk_num;
         }
 
@@ -97,7 +97,7 @@ pub async fn put_chunk(chunk_num: usize, chunk: Chunk) -> PutChunkResponse{
     } else {
         let chunks = storage::get_mut::<Chunks>();
 
-        if chunks.len() >= chunk_num{
+        if chunk_num >= chunks.len(){
             return PutChunkResponse::OutOfBounds;
         }
         
