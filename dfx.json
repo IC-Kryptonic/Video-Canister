@@ -5,6 +5,12 @@
       "candid": "src/video_canister/video_canister.did",
       "wasm": "target/wasm32-unknown-unknown/release/video_canister.wasm",
       "type": "custom"
+    },
+    "spawn_canister": {
+      "build": "cargo build --target wasm32-unknown-unknown --package spawn_canister --release",
+      "candid": "src/spawn_canister/spawn_canister.did",
+      "wasm": "target/wasm32-unknown-unknown/release/spawn_canister.wasm",
+      "type": "custom"
     }
   },
   "dfx": "0.8.4",

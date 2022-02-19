@@ -7,5 +7,5 @@ type CreateCanisterResponse = variant {
 }
 
 service : () -> {
-    "create_new_canister": () -> CreateCanisterResponse;
+    "create_new_canister": () -> (CreateCanisterResponse);
 }
