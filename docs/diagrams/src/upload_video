@@ -6,7 +6,13 @@ User -> Package ++: upload_video
 Package -> Spawn_Canister ++: create_new_canister
 
 Spawn_Canister -> Video_Canister ** : create
+Spawn_Canister ->> Management_Canister ++: update_settings
+deactivate Management_Canister
 return canister_principal
+
+Package -> Management_Canister ++: canister_status
+return canister_status
+
 
 Package ->> Video_Canister ++: put_meta_info
 deactivate Video_Canister

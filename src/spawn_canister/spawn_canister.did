@@ -10,6 +10,9 @@ type CreateCanisterResponse = variant {
 
     //error installing video canister code with management canister
     canister_installation_error;
+
+    //error changing controller of video canister with management canister
+    change_controller_error;
 }
 
 service : () -> {

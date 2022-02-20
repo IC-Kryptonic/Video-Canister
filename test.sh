@@ -8,7 +8,7 @@ dfx start --background --clean
 dfx identity use default
 dfx deploy --no-wallet video_canister --argument '(principal "nt2mv-ogwv4-u2nul-nq2vb-vtgvp-o6p7k-a6apg-tag3u-34uf5-ditv3-zqe")'
 
-dfx canister call video_canister put_meta_info '(record {name = "test_name"; description = "test_desc"; chunk_num = 1})'
+dfx canister call video_canister put_meta_info '(record {name = "test_name"; description = "test_desc"; chunk_num = 1 : nat64})'
 dfx canister call video_canister get_meta_info
 
 dfx canister call video_canister put_chunk '(0, blob "\CA\FF\EE")'
