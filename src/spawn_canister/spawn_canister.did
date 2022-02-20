@@ -4,6 +4,12 @@ type CreateCanisterResponse = variant {
 
     //not enough funds send
     insufficient_funds;
+
+    //error creating canister with management canister
+    canister_creation_error;
+
+    //error installing video canister code with management canister
+    canister_installation_error;
 }
 
 service : () -> {
