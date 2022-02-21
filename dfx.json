@@ -1,16 +1,14 @@
 {
   "canisters": {
     "video_canister": {
-      "build": "cargo build --target wasm32-unknown-unknown --package video_canister --release",
+      "package": "video_canister",
       "candid": "src/video_canister/video_canister.did",
-      "wasm": "target/wasm32-unknown-unknown/release/video_canister.wasm",
-      "type": "custom"
+      "type": "rust"
     },
     "spawn_canister": {
-      "build": "cargo build --target wasm32-unknown-unknown --package spawn_canister --release",
+      "package": "spawn_canister",
       "candid": "src/spawn_canister/spawn_canister.did",
-      "wasm": "target/wasm32-unknown-unknown/release/spawn_canister.wasm",
-      "type": "custom"
+      "type": "rust"
     }
   },
   "dfx": "0.8.4",
