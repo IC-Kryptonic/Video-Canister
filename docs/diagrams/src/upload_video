@@ -12,6 +12,8 @@ return canister_principal
 
 Package -> Management_Canister ++: canister_status
 return canister_status
+Package ->> Management_Canister ++: deposit_cycles
+deactivate Management_Canister
 
 
 Package ->> Video_Canister ++: put_meta_info
