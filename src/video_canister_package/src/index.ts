@@ -1,16 +1,35 @@
 
-import { Actor, AnonymousIdentity, HttpAgent, Identity } from "@dfinity/agent";
+import { getManagementCanister, Identity } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 
-import { getVideoCanisterActor } from "./common";
+import { getSpawnCanisterActor, getVideoCanisterActor, getManagementCanisterActor } from "./common";
 import { MetaInfo } from "./canisters/video_canister/video_canister.did";
+import { CreateCanisterResponse } from "./canisters/spawn_canister/spawn_canister.did";
+import { config } from "process";
 
-export type Video = {
+export interface Video{
   "name": string,
   "description": string,
   "version": bigint,
   "owner": Principal,
   "videoBuffer": Buffer,
+}
+
+export interface CreationVideo{
+  "name": string,
+  "description": string,
+  "videoBuffer": Buffer,
+}
+
+export async function uploadVideo(identity: Identity, video: CreationVideo){
+  const spawnActor = await getSpawnCanisterActor(identity);
+
+  const response = (await spawnActor.create_new_canister()) as { 'created' : Principal}; //TODO handle error
+
+  if ('created' in response){
+    const managementActor = getManagementCanisterActor(identity);
+  }
+
 }
 
 export async function getVideo(identity: Identity, principal: Principal): Promise<Video>{
