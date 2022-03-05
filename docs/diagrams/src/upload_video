@@ -3,30 +3,14 @@
 Actor User
 
 User -> Package ++: upload_video
-Package -> Wallet_Canister ++: wallet_call
-Wallet_Canister -> Spawn_Canister ++: create_new_canister
-
-Spawn_Canister -> Management_Canister ++: create_canister
-
-Management_Canister ->> Video_Canister ** : create
+Package -> Wallet_Canister ++: wallet_create_canister
+Wallet_Canister ->> Video_Canister ** : create
 return canister_principal
 
-Spawn_Canister ->> Management_Canister ++: install_code
+Package ->> Wallet_Canister ++: wallet_call
+Wallet_Canister ->> Management_Canister ++: install_code
 deactivate Management_Canister 
-
-Spawn_Canister ->> Management_Canister ++: update_settings
-deactivate Management_Canister
-return canister_principal
-return canister_principal
-
-Package -> Wallet_Canister ++: wallet_call
-Wallet_Canister -> Management_Canister ++: canister_status
-return canister_status
-return canister_status
-
-Package ->> Wallet_Canister ++: wallet_send
 deactivate Wallet_Canister
-
 
 Package ->> Video_Canister ++: put_meta_info
 deactivate Video_Canister
