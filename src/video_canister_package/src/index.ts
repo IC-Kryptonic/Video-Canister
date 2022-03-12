@@ -52,7 +52,7 @@ export async function uploadVideo(identity: Identity, walletId: Principal, video
   }
 
   for (let i = 0; i < chunkNum; i++){
-    const chunkSlice = video.videoBuffer.slice(i*chunkSize, Math.min(video.videoBuffer.length, i*chunkSize + 1));
+    const chunkSlice = video.videoBuffer.slice(i * chunkSize, Math.min(video.videoBuffer.length, (i + 1) *chunkSize ));
     const chunkArray = Array.from(new Uint8Array(chunkSlice));
     const chunkResponse = await videoActor.put_chunk(i, chunkArray) as {'success': null};
     if (!('success' in chunkResponse)){

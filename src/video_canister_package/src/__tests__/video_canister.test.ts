@@ -1,9 +1,11 @@
 import { AnonymousIdentity, CanisterSettings } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { getManagementCanisterActor } from '../common';
-import { CreationVideo, getVideo, uploadVideo } from '../index'
+import { CreationVideo, getVideo, uploadVideo } from '../index';
 
 jest.setTimeout(20_000);
+
+const videoCanisterVersion = 0n;
 
 test('getVideo', async () => {
     const video = await getVideo(new AnonymousIdentity, Principal.fromText("renrk-eyaaa-aaaaa-aaada-cai"));
@@ -27,9 +29,11 @@ test('createVideo', async () =>{
 
     const principal: Principal = await uploadVideo(anon, anonWallet, video, creationCycles);
 
-    //const managementActor = await getManagementCanisterActor(anon);
+    const uploadedVideo = await getVideo(anon, principal);
 
-//    let status = await managementActor.canister_status(principal);
-
-    //expect(status.controller[0]?.toString).toBe(anon.getPrincipal.toString);
+    expect(uploadedVideo.name).toBe(video.name);
+    expect(uploadedVideo.description).toBe(video.description);
+    expect(uploadedVideo.videoBuffer).toStrictEqual(video.videoBuffer);
+    expect(uploadedVideo.owner).toStrictEqual(anon.getPrincipal());
+    expect(uploadedVideo.version).toStrictEqual(videoCanisterVersion);
 });
