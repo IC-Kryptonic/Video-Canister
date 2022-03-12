@@ -1,16 +1,18 @@
 import fetch from "node-fetch";
 
-import { Actor, getManagementCanister, HttpAgent, Identity } from "@dfinity/agent";
+import { Actor, HttpAgent, Identity } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 
-import { canisterId as spawnCanisterId } from "./canisters/spawn_canister";
+//import { canisterId as spawnCanisterId } from "./canisters/spawn_canister";
 
 import { idlFactory as videoCanisterIdl} from './canisters/video_canister/videoCanister_idl.did';
-import { idlFactory as spawnCanisterIdl} from './canisters/spawn_canister/spawn_canister_idl.did';
+import { idlFactory as spawnCanisterIdl} from './canisters/spawn_canister/spawnCanister_idl.did';
+import { idlFactory as managementCanisterIdl} from './canisters/management_canister/managementCanister_idl.did';
+import { idlFactory as walletCanisterIdl} from './canisters/wallet_canister/walletCanister_idl.did';
 
 (global as any).fetch = fetch; 
 
-
+export const managementPrincipal = Principal.fromText("aaaaa-aa");
 
 let _identity: null | Identity = null;
 let _httpAgent: null | HttpAgent = null;
@@ -39,13 +41,22 @@ export const getSpawnCanisterActor = async (identity: Identity) => {
   const httpAgent = await getHttpAgent(identity);
   return Actor.createActor(spawnCanisterIdl, {
     agent: httpAgent,
-    canisterId: spawnCanisterId as string //TODO dynamic
+    canisterId: "ryjl3-tyaaa-aaaaa-aaaba-cai"//TODO dynamic
   });
 }
 
 export const getManagementCanisterActor = async (identity: Identity) => {
   const httpAgent = await getHttpAgent(identity);
-  return getManagementCanister({
+  return Actor.createActor(managementCanisterIdl, {
     agent: httpAgent,
-  })
+    canisterId: "aaaaa-aa"
+  });
+}
+
+export const getWalletCanisterActor = async (identity: Identity, canisterId: Principal) => {
+  const httpAgent = await getHttpAgent(identity);
+  return Actor.createActor(walletCanisterIdl, {
+    agent: httpAgent,
+    canisterId: canisterId, 
+  });
 }
