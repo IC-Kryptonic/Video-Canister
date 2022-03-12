@@ -62,9 +62,9 @@ static VIDEO_CANISTER_CODE: &[u8;  include_bytes!("../../../target/wasm32-unknow
 const MIN_CANISTER_CYCLES_REQUIERED: u64 = 200_000_000_000; //TODO rough guess, calculate correct costs
 
 #[update]
-pub async fn create_new_canister() -> CreateCanisterResponse{
+pub async fn create_new_canister(owner: Principal) -> CreateCanisterResponse{
 
-    let owner = ic_cdk::api::caller(); //call early before any callbacks
+    let owner_wallet = ic_cdk::api::caller(); //call early before any callbacks
 
     if call::msg_cycles_available() < MIN_CANISTER_CYCLES_REQUIERED{
         return CreateCanisterResponse::InsufficientFunds;
@@ -83,7 +83,7 @@ pub async fn create_new_canister() -> CreateCanisterResponse{
         return CreateCanisterResponse::CanisterInstallationError;
     };
 
-    if let Err(_err_str) = change_controller_to_owner(canister_princ.clone(), &owner).await{
+    if let Err(_err_str) = change_controller_to_owner(canister_princ.clone(), &owner_wallet).await{
         return CreateCanisterResponse::ChangeControllerError;
     }
 

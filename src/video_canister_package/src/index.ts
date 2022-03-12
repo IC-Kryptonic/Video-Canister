@@ -2,7 +2,7 @@ import { CanisterSettings, getManagementCanister, Identity } from "@dfinity/agen
 import { Principal } from "@dfinity/principal";
 
 import { getSpawnCanisterActor, getVideoCanisterActor, getManagementCanisterActor, getWalletCanisterActor, managementPrincipal } from "./common";
-import { MetaInfo } from "./canisters/video_canister/video_canister.did";
+import { MetaInfo, PutMetaInfoResponse } from "./canisters/video_canister/video_canister.did";
 import { fromHexString } from "@dfinity/candid/lib/cjs/utils/buffer";
 import { IDL } from "@dfinity/candid";
 import { Null } from "@dfinity/candid/lib/cjs/idl";
@@ -23,7 +23,9 @@ export interface CreationVideo{
 
 const spawnPrincipal = Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai"); 
 
-const creationCycles = 200_000_000_000
+const creationCycles: bigint = BigInt(200_000_000_000);
+
+const chunkSize = 1024;
 
 export async function uploadVideo(identity: Identity, walletId: Principal, video: CreationVideo, cycles: bigint): Promise<Principal>{
 
@@ -31,9 +33,35 @@ export async function uploadVideo(identity: Identity, walletId: Principal, video
     throw Error("Not enough cycles, need at least " + creationCycles + " for video canister creation");
   }
   
-  let videoPrincipal = await createNewCanister(identity, walletId, cycles);
+  let videoPrincipal = await createNewCanister(identity, walletId, creationCycles);
   
   await checkController(identity, walletId, videoPrincipal);
+
+  await depositCycles(identity, walletId, videoPrincipal, cycles - creationCycles);
+  
+  const videoActor = await getVideoCanisterActor(identity, videoPrincipal);
+  const chunkNum = Math.floor(video.videoBuffer.length / chunkSize) + 1;
+  const metaResponse = await videoActor.put_meta_info({
+    'name': video.name,
+    'description': video.description,
+    'chunk_num': chunkNum
+  }) as {'success': null};
+  if (!('success' in metaResponse)){
+    console.error(metaResponse);
+    throw Error("Could not put meta info into video canister");
+  }
+
+  for (let i = 0; i < chunkNum; i++){
+    const chunkSlice = video.videoBuffer.slice(i*chunkSize, Math.min(video.videoBuffer.length, i*chunkSize + 1));
+    const chunkArray = Array.from(new Uint8Array(chunkSlice));
+    const chunkResponse = await videoActor.put_chunk(i, chunkArray) as {'success': null};
+    if (!('success' in chunkResponse)){
+      console.error(chunkResponse);
+      throw Error("Could not put chunk " + i + " into the video canister");
+    }
+  }
+
+  //TODO Index canister
 
   return videoPrincipal;
 }
@@ -76,7 +104,7 @@ async function createNewCanister(identity: Identity, wallet_id: Principal, creat
   const walletResponse = await walletActor.wallet_call({
     canister: spawnPrincipal,
     method_name: "create_new_canister",
-    args: [...Buffer.from(IDL.encode([],[]))],
+    args: [...Buffer.from(IDL.encode([IDL.Principal],[identity.getPrincipal()]))],
     cycles: creation_cycles,
   }) as {'Ok' : { 'return' : Array<number>}};
 
@@ -108,7 +136,6 @@ async function checkController(identity: Identity, wallet: Principal, video_cani
 
   const walletActor = await getWalletCanisterActor(identity, wallet);
 
-
   const encoded_args = IDL.encode([IDL.Record({ canister_id: IDL.Principal})], [{'canister_id': video_canister}]);
 
   const walletResponse = await walletActor.wallet_call({
@@ -137,6 +164,27 @@ async function checkController(identity: Identity, wallet: Principal, video_cani
       throw Error("Video Canister controller is not wallet, instead it is " + response.settings.controllers[0]);
     }
   } else {
+    throw Error("Wallet call failed");
+  }
+}
+
+async function depositCycles(identity: Identity, wallet: Principal, video_canister: Principal, cycles: bigint){
+  const walletActor = await getWalletCanisterActor(identity, wallet);
+
+  const encoded_args = IDL.encode([IDL.Record({ canister_id: IDL.Principal})], [{'canister_id': video_canister}]);
+
+  const walletResponse = await walletActor.wallet_call({
+    canister: managementPrincipal,
+    method_name: "deposit_cycles",
+    args: [...Buffer.from(encoded_args)],
+    cycles: cycles,
+  }) as {'Ok' : { 'return' : Array<number>}};
+
+  if ('Ok' in walletResponse){
+    const raw_response = walletResponse.Ok.return;
+    let response = IDL.decode([], Buffer.from(raw_response))[0];
+  } else {
+    console.error(walletResponse);
     throw Error("Wallet call failed");
   }
 }

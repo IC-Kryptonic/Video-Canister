@@ -24,7 +24,9 @@ Wallet_Canister -> Management_Canister ++: canister_status
 return canister_status
 return canister_status
 
-Package ->> Wallet_Canister ++: wallet_send
+Package ->> Wallet_Canister ++: wallet_call
+Wallet_Canister ->> Management_Canister ++: deposit_cycles
+deactivate Management_Canister
 deactivate Wallet_Canister
 
 

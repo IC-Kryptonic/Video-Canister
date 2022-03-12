@@ -3,7 +3,7 @@ import { Principal } from '@dfinity/principal';
 import { getManagementCanisterActor } from '../common';
 import { CreationVideo, getVideo, uploadVideo } from '../index'
 
-jest.setTimeout(10_000);
+jest.setTimeout(20_000);
 
 test('getVideo', async () => {
     const video = await getVideo(new AnonymousIdentity, Principal.fromText("renrk-eyaaa-aaaaa-aaada-cai"));
