@@ -2,10 +2,11 @@ import { CanisterSettings, getManagementCanister, Identity } from "@dfinity/agen
 import { Principal } from "@dfinity/principal";
 
 import { getSpawnCanisterActor, getVideoCanisterActor, getManagementCanisterActor, getWalletCanisterActor, managementPrincipal } from "./common";
-import { MetaInfo, PutMetaInfoResponse } from "./canisters/video_canister/video_canister.did";
+import { ChangeOwnerResponse, MetaInfo, PutMetaInfoResponse } from "./canisters/video_canister/video_canister.did";
 import { fromHexString } from "@dfinity/candid/lib/cjs/utils/buffer";
 import { IDL } from "@dfinity/candid";
 import { Null } from "@dfinity/candid/lib/cjs/idl";
+import { isDeepStrictEqual } from "util";
 
 export interface Video{
   "name": string,
@@ -98,15 +99,70 @@ export async function getVideo(identity: Identity, principal: Principal): Promis
   }
 }
 
-async function createNewCanister(identity: Identity, wallet_id: Principal, creation_cycles: BigInt): Promise<Principal>{
-  const walletActor = await getWalletCanisterActor(identity, wallet_id);
+export async function changeOwner(oldIdentity: Identity, oldWallet: Principal, videoPrincipal: Principal, newOwner: Principal, newOwnerWallet: Principal) {
+  await changeCanisterController(oldIdentity, oldWallet, videoPrincipal, newOwnerWallet);
+
+  await changeVideoOwner(oldIdentity, videoPrincipal, newOwner);
+}
+
+async function changeVideoOwner(oldIdentity: Identity, videoPrincipal: Principal, newOwner: Principal){
+  const videoCanister = await getVideoCanisterActor(oldIdentity, videoPrincipal);
+
+  let response = await videoCanister.changeOwner(newOwner) as {'success': null};
+
+  if (!('success' in response)){
+    console.error(response);
+    throw Error("Could not change owner of video canister");
+  }
+}
+
+async function changeCanisterController(oldIdentity: Identity, oldWallet: Principal, videoPrincipal: Principal, newOwnerWallet: Principal){
+  const walletActor = await getWalletCanisterActor(oldIdentity, oldWallet);
+
+  const encodedArgs = IDL.encode(
+    [IDL.Record({
+      canister_id: IDL.Principal,
+      settings: IDL.Record({
+        controllers: IDL.Opt(IDL.Vec(IDL.Principal)),
+        compute_allocation: IDL.Opt(IDL.Nat),
+        memory_allocation: IDL.Opt(IDL.Nat),
+        freezing_threshold: IDL.Opt(IDL.Nat),
+      })
+    })], [{
+      'canister_id': videoPrincipal,
+      'settings': {
+        'controllers': [[newOwnerWallet]],
+        'compute_allocation': [],
+        'memory_allocation': [],
+        'freezing_threshold': [],
+      }
+    }]);
+
+  const walletResponse = await walletActor.wallet_call({
+    canister: managementPrincipal,
+    method_name: "update_settings",
+    args: [...Buffer.from(encodedArgs)],
+    cycles: 0,
+  }) as {'Ok': {'return': Array<number>}};
+
+  if ('Ok' in walletResponse){
+    const raw_response = walletResponse.Ok.return;
+    IDL.decode([], Buffer.from(raw_response))[0];
+  } else {
+    console.error(walletResponse);
+    throw Error("Wallet call failed");
+  }
+}
+
+async function createNewCanister(identity: Identity, walletId: Principal, creationCycles: BigInt): Promise<Principal>{
+  const walletActor = await getWalletCanisterActor(identity, walletId);
 
   const walletResponse = await walletActor.wallet_call({
     canister: spawnPrincipal,
     method_name: "create_new_canister",
     args: [...Buffer.from(IDL.encode([IDL.Principal],[identity.getPrincipal()]))],
-    cycles: creation_cycles,
-  }) as {'Ok' : { 'return' : Array<number>}};
+    cycles: creationCycles,
+  }) as {'Ok': {'return': Array<number>}};
 
   if ('Ok' in walletResponse){
     const raw_response = walletResponse.Ok.return;

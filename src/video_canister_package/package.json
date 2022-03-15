@@ -15,6 +15,7 @@
   "license": "MIT",
   "dependencies": {
     "@dfinity/agent": "^0.10.3",
+    "@dfinity/identity": "0.10.3",
     "node-fetch": "^2.6.7"
   },
   "devDependencies": {
