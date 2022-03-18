@@ -8,7 +8,7 @@ jest.setTimeout(20_000);
 const videoCanisterVersion = 0n;
 
 test('getVideo', async () => {
-    const video = await getVideo(new AnonymousIdentity, Principal.fromText("renrk-eyaaa-aaaaa-aaada-cai"));
+    const video = await getVideo(new AnonymousIdentity, Principal.fromText("rno2w-sqaaa-aaaaa-aaacq-cai"));
     
     expect(video.name).toBe('test_name');
     expect(video.videoBuffer).toStrictEqual(Buffer.from([0xCA,0xFF,0xEE]))
@@ -23,7 +23,7 @@ test('createVideo', async () => {
     }
 
     const anon = new AnonymousIdentity();
-    const anonWallet = Principal.fromText("rdmx6-jaaaa-aaaaa-aaadq-cai");
+    const anonWallet = Principal.fromText("renrk-eyaaa-aaaaa-aaada-cai");
 
     const creationCycles: bigint = BigInt(200_000_000_000);
 
@@ -46,7 +46,7 @@ test('changeOwner', async () => {
     }
 
     const anon = new AnonymousIdentity();
-    const anonWallet = Principal.fromText("rdmx6-jaaaa-aaaaa-aaadq-cai");
+    const anonWallet = Principal.fromText("renrk-eyaaa-aaaaa-aaada-cai");
 
     const creationCycles: bigint = BigInt(200_000_000_000);
 
