@@ -22,14 +22,13 @@ dfx deploy spawn_canister
 
 
 #create test identities with wallets
-dfx identity new alice
 
-dfx identity use alice
-alice="$(dfx identity get-principal)"
-alice_wallet="$(dfx identity get-wallet)"
+dfx identity use anonymous
+anon="$(dfx identity get-principal)"
+anon_wallet="$(dfx identity get-wallet)"
 
 #create video canister
-video_principal="$(dfx canister --wallet=$alice_wallet call --with-cycles 200000000000 spawn_canister create_new_canister "(principal \"$alice\")")"
+video_principal="$(dfx canister --wallet=$anon_wallet call --with-cycles 200000000000 spawn_canister create_new_canister "(principal \"$anon\")")"
 video_principal=${video_principal%"\" })"}
 video_principal=${video_principal#"(variant { created = principal \""}
 echo "video canister id $video_principal"

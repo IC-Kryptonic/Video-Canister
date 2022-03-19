@@ -3,7 +3,7 @@ import { Principal } from '@dfinity/principal';
 import { Secp256k1KeyIdentity } from '@dfinity/identity';
 import { CreationVideo, getVideo, uploadVideo, changeOwner} from '../index';
 
-jest.setTimeout(20_000);
+jest.setTimeout(30_000);
 
 const videoCanisterVersion = 0n;
 
@@ -23,7 +23,7 @@ test('createVideo', async () => {
     }
 
     const anon = new AnonymousIdentity();
-    const anonWallet = Principal.fromText("renrk-eyaaa-aaaaa-aaada-cai");
+    const anonWallet = Principal.fromText("rkp4c-7iaaa-aaaaa-aaaca-cai");
 
     const creationCycles: bigint = BigInt(200_000_000_000);
 
@@ -46,7 +46,7 @@ test('changeOwner', async () => {
     }
 
     const anon = new AnonymousIdentity();
-    const anonWallet = Principal.fromText("renrk-eyaaa-aaaaa-aaada-cai");
+    const anonWallet = Principal.fromText("rkp4c-7iaaa-aaaaa-aaaca-cai");
 
     const creationCycles: bigint = BigInt(200_000_000_000);
 

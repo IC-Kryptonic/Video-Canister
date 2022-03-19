@@ -108,7 +108,7 @@ export async function changeOwner(oldIdentity: Identity, oldWallet: Principal, v
 async function changeVideoOwner(oldIdentity: Identity, videoPrincipal: Principal, newOwner: Principal){
   const videoCanister = await getVideoCanisterActor(oldIdentity, videoPrincipal);
 
-  let response = await videoCanister.changeOwner(newOwner) as {'success': null};
+  let response = await videoCanister.change_owner(newOwner) as {'success': null};
 
   if (!('success' in response)){
     console.error(response);
