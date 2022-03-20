@@ -2,6 +2,11 @@ use ic_cdk::export::candid::{CandidType, Deserialize, Principal,};
 use ic_cdk_macros::{update, query, init, pre_upgrade, post_upgrade};
 use ic_cdk::storage;
 
+const CANISTER_VERSION: usize = 0usize;
+
+type Chunk = Vec<u8>;
+type Chunks = Vec<Chunk>;
+
 #[derive(CandidType, Deserialize)]
 pub struct PutMetaInfo{
     pub name: String,
@@ -59,11 +64,6 @@ pub enum ChangeOwnerResponse{
     #[serde(rename = "missing_rights")]
     MissingRights,
 }
-
-type Chunk = Vec<u8>;
-type Chunks = Vec<Chunk>;
-
-const CANISTER_VERSION: usize = 0usize;
 
 #[init]
 pub async fn init(owner: Principal){
