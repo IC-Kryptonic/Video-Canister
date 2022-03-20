@@ -126,7 +126,8 @@ pub async fn get_meta_info() -> &'static MetaInfo{
 
 #[query]
 pub async fn get_chunk(chunk_num: usize) -> Option<&'static Chunk>{
-    return storage::get::<Chunks>().get(chunk_num);
+    let chunks = storage::get::<Chunks>();
+    return chunks.get(chunk_num);
 }
 
 #[pre_upgrade]
