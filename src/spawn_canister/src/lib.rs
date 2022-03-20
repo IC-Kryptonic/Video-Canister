@@ -64,7 +64,7 @@ const MIN_CANISTER_CYCLES_REQUIRED: u64 = 100_000_000_000 + 10_000_000_000; //TO
 #[update]
 pub async fn create_new_canister() -> CreateCanisterResponse{
 
-    let owner = ic_cdk::api::caller(); //call early before any callbacks
+    let owner = ic_cdk::api::caller(); //call early before any callbacks from calling other canisters
 
     if call::msg_cycles_available() < MIN_CANISTER_CYCLES_REQUIRED{
         return CreateCanisterResponse::InsufficientFunds;
