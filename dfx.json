@@ -1,27 +1,14 @@
 {
   "canisters": {
-    "Video_Canister": {
-      "main": "src/Video_Canister/main.mo",
-      "type": "motoko"
+    "video_canister": {
+      "package": "video_canister",
+      "candid": "src/video_canister/video_canister.did",
+      "type": "rust"
     },
-    "Video_Canister_assets": {
-      "dependencies": [
-        "Video_Canister"
-      ],
-      "frontend": {
-        "entrypoint": "src/Video_Canister_assets/src/index.html"
-      },
-      "source": [
-        "src/Video_Canister_assets/assets",
-        "dist/Video_Canister_assets/"
-      ],
-      "type": "assets"
-    }
-  },
-  "defaults": {
-    "build": {
-      "args": "",
-      "packtool": ""
+    "spawn_canister": {
+      "package": "spawn_canister",
+      "candid": "src/spawn_canister/spawn_canister.did",
+      "type": "rust"
     }
   },
   "dfx": "0.8.4",

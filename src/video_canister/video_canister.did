@@ -3,16 +3,16 @@ type Chunk = blob;
 type PutMetaInfo = record {
     "name": text;
     "description": text;
-    "chunk_num": nat;
-}
+    "chunk_num": nat64;
+};
 
 type MetaInfo = record {
     "name": text;
     "description": text;
-    "chunk_num": nat;
-    "version": nat;
+    "chunk_num": nat64;
+    "version": nat64;
     "owner": principal;
-}
+};
 
 type PutMetaInfoResponse = variant {
     //success
@@ -20,27 +20,30 @@ type PutMetaInfoResponse = variant {
 
     //Not the owner
     missing_rights;
-}
+};
 
 type PutChunkResponse = variant {
     //success
     success;
 
+    //Not the owner
+    missing_rights;
+
     //outside array range
     out_of_bounds;
-}
+};
 
 type ChangeOwnerResponse = variant {
     success;
 
     missing_rights;
-}
+};
 
 service : (principal) -> {
     "put_meta_info": (PutMetaInfo) -> (PutMetaInfoResponse);
-    "put_chunk": (nat, Chunk) -> (PutChunkResponse);
+    "put_chunk": (nat64, Chunk) -> (PutChunkResponse);
     "get_meta_info": () -> (MetaInfo) query;
-    "get_chunk": (nat) -> (opt Chunk) query;
+    "get_chunk": (nat64) -> (opt Chunk) query;
 
     "change_owner": (principal) -> (ChangeOwnerResponse);
 }
