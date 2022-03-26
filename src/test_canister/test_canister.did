@@ -1,0 +1,23 @@
+type CreateCanisterResponse = variant {
+    //success
+    created: principal;
+
+    //not enough funds send
+    insufficient_funds: nat64;
+
+    //unknown error
+    unknown_error: text;
+
+    //error creating canister with management canister
+    canister_creation_error;
+
+    //error installing video canister code with management canister
+    canister_installation_error;
+
+    //error changing controller of video canister with management canister
+    change_controller_error;
+}
+
+service : () -> {
+    "test_create_new_canister": (nat64, text) -> (CreateCanisterResponse);
+}

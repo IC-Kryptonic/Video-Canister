@@ -9,6 +9,11 @@
       "package": "spawn_canister",
       "candid": "src/spawn_canister/spawn_canister.did",
       "type": "rust"
+    },
+    "test_canister": {
+      "package": "test_canister",
+      "candid": "src/test_canister/test_canister.did",
+      "type": "rust"
     }
   },
   "dfx": "0.9.3",
