@@ -3,7 +3,7 @@ type CreateCanisterResponse = variant {
     created: principal;
 
     //not enough funds send
-    insufficient_funds;
+    insufficient_funds: nat64;
 
     //error creating canister with management canister
     canister_creation_error;

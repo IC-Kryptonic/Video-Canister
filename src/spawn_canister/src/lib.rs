@@ -8,7 +8,7 @@ pub enum CreateCanisterResponse{
     Created(Principal),
 
     #[serde(rename = "insufficient_funds")]
-    InsufficientFunds,
+    InsufficientFunds(u64),
 
     #[serde(rename = "canister_creation_error")]
     CanisterCreationError,
@@ -68,7 +68,7 @@ pub async fn create_new_canister() -> CreateCanisterResponse{
     let available_cycles = call::msg_cycles_available();  
 
     if available_cycles < MIN_CANISTER_CYCLES_REQUIRED{
-        return CreateCanisterResponse::InsufficientFunds;
+        return CreateCanisterResponse::InsufficientFunds(available_cycles);
     } else {
         call::msg_cycles_accept(available_cycles);
     }
