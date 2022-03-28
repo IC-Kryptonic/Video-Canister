@@ -67,7 +67,7 @@ pub async fn create_new_canister(owner: Principal) -> CreateCanisterResponse{
     let owner_wallet = ic_cdk::api::caller(); //call early before any callbacks
     let available_cycles = call::msg_cycles_available();  
 
-    if available_cycles < MIN_CANISTER_CYCLES_REQUIRED{
+    if available_cycles < MIN_CANISTER_CYCLES_REQUIERED{
         return CreateCanisterResponse::InsufficientFunds;
     } else {
         call::msg_cycles_accept(available_cycles);
