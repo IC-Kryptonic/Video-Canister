@@ -3,7 +3,7 @@ import fetch from "node-fetch";
 import { Actor, HttpAgent, Identity } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 
-//import { canisterId as spawnCanisterId } from "./canisters/spawn_canister";
+import { spawn_canister as spawn_canister_id } from "../../../.dfx/local/canister_ids.json"; //TODO for deployment, probably doesnt work for deployment
 
 import { idlFactory as videoCanisterIdl} from './canisters/video_canister/videoCanister_idl.did';
 import { idlFactory as spawnCanisterIdl} from './canisters/spawn_canister/spawnCanister_idl.did';
@@ -22,7 +22,7 @@ export const getHttpAgent = async (identity: Identity) => {
         _identity = identity;
         _httpAgent = new HttpAgent({
           identity,
-          host:"http://localhost:8000", //TODO dynamic
+          host:"http://localhost:8000", //TODO deployment
         });
         await _httpAgent.fetchRootKey();
     }
@@ -41,7 +41,7 @@ export const getSpawnCanisterActor = async (identity: Identity) => {
   const httpAgent = await getHttpAgent(identity);
   return Actor.createActor(spawnCanisterIdl, {
     agent: httpAgent,
-    canisterId: "ryjl3-tyaaa-aaaaa-aaaba-cai"//TODO dynamic
+    canisterId: spawn_canister_id.local //TODO deployment
   });
 }
 

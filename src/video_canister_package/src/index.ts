@@ -1,12 +1,9 @@
-import { CanisterSettings, getManagementCanister, Identity } from "@dfinity/agent";
+import { Identity } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 
-import { getSpawnCanisterActor, getVideoCanisterActor, getManagementCanisterActor, getWalletCanisterActor, managementPrincipal } from "./common";
-import { ChangeOwnerResponse, MetaInfo, PutMetaInfoResponse } from "./canisters/video_canister/video_canister.did";
-import { fromHexString } from "@dfinity/candid/lib/cjs/utils/buffer";
+import { getVideoCanisterActor, getWalletCanisterActor, managementPrincipal } from "./common";
+import { MetaInfo } from "./canisters/video_canister/video_canister.did";
 import { IDL } from "@dfinity/candid";
-import { Null } from "@dfinity/candid/lib/cjs/idl";
-import { isDeepStrictEqual } from "util";
 
 export interface Video{
   "name": string,
