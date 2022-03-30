@@ -67,33 +67,35 @@ export async function uploadVideo(identity: Identity, walletId: Principal, video
 
 export async function getVideo(identity: Identity, principal: Principal): Promise<Video>{
   const actor = await getCanisterActor(identity, CANISTER_TYPE.VIDEO_CANISTER, principal);
-  const metaInfo = (await actor.get_meta_info()) as MetaInfo;
   
-  const chunksAsPromises = [] ;
-  for (let i = 0; i < metaInfo.chunk_num; i++){
-    chunksAsPromises.push(actor.get_chunk(i) as Promise<number[][]>);
-  }
-  const chunkBuffers: Uint8Array[] = [];
-  const nestedBytes = (await Promise.all(chunksAsPromises))
-    .map((val: number[][]) => {
-      if (val[0] === undefined) {
-        return null;
-      } else {
-        return val[0];
-      }
-    })
-    .filter((v) => v !== null);
-  nestedBytes.forEach((bytes) => {
-    const bytesAsBuffer = Buffer.from(new Uint8Array(bytes as number[]));
-    chunkBuffers.push(bytesAsBuffer);
-  });
+  try {
+    const metaInfo = (await actor.get_meta_info()) as MetaInfo;
+    const chunksAsPromises = [] ;
+    
+    for (let i = 0; i < metaInfo.chunk_num; i++){
+      chunksAsPromises.push(actor.get_chunk(i) as Promise<Array<number[] | undefined[]>>);
+    }
 
-  return {
-    name: metaInfo.name,
-    description: metaInfo.description,
-    version: metaInfo.version,
-    owner: metaInfo.owner,
-    videoBuffer: Buffer.concat(chunkBuffers)
+    const chunkBuffers: Uint8Array[] = [];
+
+    const nestedBytes = (await Promise.all(chunksAsPromises))
+      .map((val) => val[0] ? val[0] : null)
+      .filter((v) => v !== null) as number [][];
+
+    nestedBytes.forEach((bytes) => {
+      const bytesAsBuffer = Buffer.from(new Uint8Array(bytes));
+      chunkBuffers.push(bytesAsBuffer);
+    });
+
+    return {
+      name: metaInfo.name,
+      description: metaInfo.description,
+      version: metaInfo.version,
+      owner: metaInfo.owner,
+      videoBuffer: Buffer.concat(chunkBuffers)
+    }
+  } catch(error) {
+    throw new Error("Unable to query video: " + error);
   }
 }
 
