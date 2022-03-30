@@ -5,8 +5,10 @@ import { Principal } from '@dfinity/principal';
 
 import { CANISTER_IDL_MAP, CANISTER_TYPE, MANAGEMENT_PRINCIPAL_ID } from './constants';
 
+// fetch needs to be available internally for the HttpAgent
 (global as any).fetch = fetch;
 
+// TODO unsafe
 export const managementPrincipal = Principal.fromText(MANAGEMENT_PRINCIPAL_ID);
 
 let _identity: null | Identity = null;
