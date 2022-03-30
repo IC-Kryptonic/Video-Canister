@@ -136,19 +136,19 @@ async function changeCanisterController(oldIdentity: Identity, oldWallet: Princi
       }
     }]);
 
-  const walletResponse = await walletActor.wallet_call({
-    canister: managementPrincipal,
-    method_name: "update_settings",
-    args: [...Buffer.from(encodedArgs)],
-    cycles: 0,
-  }) as {'Ok': {'return': Array<number>}};
-
-  if ('Ok' in walletResponse){
-    const raw_response = walletResponse.Ok.return;
-    IDL.decode([], Buffer.from(raw_response))[0];
-  } else {
-    console.error(walletResponse);
-    throw Error("Wallet call failed");
+  try {
+    const walletResponse = await walletActor.wallet_call({
+      canister: managementPrincipal,
+      method_name: "update_settings",
+      args: [...Buffer.from(encodedArgs)],
+      cycles: 0,
+    }) as Object;
+  
+    if (!('Ok' in walletResponse)){
+      throw Error(walletResponse.toString());
+    }
+  } catch(error) {
+    throw Error("Unable to change canister controller: " + error);
   }
 }
 
