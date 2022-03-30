@@ -1,9 +1,10 @@
 import { Identity } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 
-import { getVideoCanisterActor, getWalletCanisterActor, managementPrincipal } from "./common";
+import { getCanisterActor, managementPrincipal } from "./common";
 import { MetaInfo } from "./canisters/video_canister/video_canister.did";
 import { IDL } from "@dfinity/candid";
+import { CANISTER_TYPE, CHUNK_SIZE, CREATION_CYCLES, SPAWN_PRINCIPAL_ID } from "./constants";
 
 export interface Video{
   "name": string,
@@ -19,26 +20,22 @@ export interface CreationVideo{
   "videoBuffer": Buffer,
 }
 
-const spawnPrincipal = Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai"); 
-
-const creationCycles: bigint = BigInt(200_000_000_000);
-
-const chunkSize = 1024;
+const spawnPrincipal = Principal.fromText(SPAWN_PRINCIPAL_ID); 
 
 export async function uploadVideo(identity: Identity, walletId: Principal, video: CreationVideo, cycles: bigint): Promise<Principal>{
 
-  if (cycles < creationCycles){
-    throw Error("Not enough cycles, need at least " + creationCycles + " for video canister creation");
+  if (cycles < CREATION_CYCLES){
+    throw Error("Not enough cycles, need at least " + CREATION_CYCLES + " for video canister creation");
   }
   
-  let videoPrincipal = await createNewCanister(identity, walletId, creationCycles);
+  let videoPrincipal = await createNewCanister(identity, walletId, CREATION_CYCLES);
   
   await checkController(identity, walletId, videoPrincipal);
 
-  await depositCycles(identity, walletId, videoPrincipal, cycles - creationCycles);
+  await depositCycles(identity, walletId, videoPrincipal, cycles - CREATION_CYCLES);
   
-  const videoActor = await getVideoCanisterActor(identity, videoPrincipal);
-  const chunkNum = Math.floor(video.videoBuffer.length / chunkSize) + 1;
+  const videoActor = await getCanisterActor(identity, CANISTER_TYPE.VIDEO_CANISTER, videoPrincipal);
+  const chunkNum = Math.floor(video.videoBuffer.length / CHUNK_SIZE) + 1;
   const metaResponse = await videoActor.put_meta_info({
     'name': video.name,
     'description': video.description,
@@ -50,8 +47,8 @@ export async function uploadVideo(identity: Identity, walletId: Principal, video
   }
 
   for (let i = 0; i < chunkNum; i++){
-    const chunkSlice = video.videoBuffer.slice(i * chunkSize, Math.min(video.videoBuffer.length, (i + 1) *chunkSize ));
-    const chunkArray = Array.from(new Uint8Array(chunkSlice));
+    const chunkSlice = video.videoBuffer.slice(i * CHUNK_SIZE, Math.min(video.videoBuffer.length, (i + 1) * CHUNK_SIZE ));
+    const chunkArray = Array.from(chunkSlice);
     const chunkResponse = await videoActor.put_chunk(i, chunkArray) as {'success': null};
     if (!('success' in chunkResponse)){
       console.error(chunkResponse);
@@ -65,7 +62,7 @@ export async function uploadVideo(identity: Identity, walletId: Principal, video
 }
 
 export async function getVideo(identity: Identity, principal: Principal): Promise<Video>{
-  const actor = await getVideoCanisterActor(identity, principal);
+  const actor = await getCanisterActor(identity, CANISTER_TYPE.VIDEO_CANISTER, principal);
   const metaInfo = (await actor.get_meta_info()) as MetaInfo;
   
   const chunksAsPromises = [] ;
@@ -103,7 +100,7 @@ export async function changeOwner(oldIdentity: Identity, oldWallet: Principal, v
 }
 
 async function changeVideoOwner(oldIdentity: Identity, videoPrincipal: Principal, newOwner: Principal){
-  const videoCanister = await getVideoCanisterActor(oldIdentity, videoPrincipal);
+  const videoCanister = await getCanisterActor(oldIdentity, CANISTER_TYPE.VIDEO_CANISTER, videoPrincipal);
 
   let response = await videoCanister.change_owner(newOwner) as {'success': null};
 
@@ -114,7 +111,7 @@ async function changeVideoOwner(oldIdentity: Identity, videoPrincipal: Principal
 }
 
 async function changeCanisterController(oldIdentity: Identity, oldWallet: Principal, videoPrincipal: Principal, newOwnerWallet: Principal){
-  const walletActor = await getWalletCanisterActor(oldIdentity, oldWallet);
+  const walletActor = await getCanisterActor(oldIdentity, CANISTER_TYPE.WALLET_CANISTER, oldWallet);
 
   const encodedArgs = IDL.encode(
     [IDL.Record({
@@ -152,7 +149,7 @@ async function changeCanisterController(oldIdentity: Identity, oldWallet: Princi
 }
 
 async function createNewCanister(identity: Identity, walletId: Principal, creationCycles: BigInt): Promise<Principal>{
-  const walletActor = await getWalletCanisterActor(identity, walletId);
+  const walletActor = await getCanisterActor(identity, CANISTER_TYPE.WALLET_CANISTER, walletId);
 
   const walletResponse = await walletActor.wallet_call({
     canister: spawnPrincipal,
@@ -187,7 +184,7 @@ async function createNewCanister(identity: Identity, walletId: Principal, creati
 
 async function checkController(identity: Identity, wallet: Principal, video_canister: Principal){
 
-  const walletActor = await getWalletCanisterActor(identity, wallet);
+  const walletActor = await getCanisterActor(identity, CANISTER_TYPE.WALLET_CANISTER, wallet);
 
   const encoded_args = IDL.encode([IDL.Record({ canister_id: IDL.Principal})], [{'canister_id': video_canister}]);
 
@@ -222,7 +219,7 @@ async function checkController(identity: Identity, wallet: Principal, video_cani
 }
 
 async function depositCycles(identity: Identity, wallet: Principal, video_canister: Principal, cycles: bigint){
-  const walletActor = await getWalletCanisterActor(identity, wallet);
+  const walletActor = await getCanisterActor(identity, CANISTER_TYPE.WALLET_CANISTER, wallet);
 
   const encoded_args = IDL.encode([IDL.Record({ canister_id: IDL.Principal})], [{'canister_id': video_canister}]);
 
@@ -235,7 +232,7 @@ async function depositCycles(identity: Identity, wallet: Principal, video_canist
 
   if ('Ok' in walletResponse){
     const raw_response = walletResponse.Ok.return;
-    let response = IDL.decode([], Buffer.from(raw_response))[0];
+    IDL.decode([], Buffer.from(raw_response))[0];
   } else {
     console.error(walletResponse);
     throw Error("Wallet call failed");
