@@ -1,9 +1,9 @@
 import fetch from 'node-fetch';
-
 import { Actor, HttpAgent, Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 
 import { CANISTER_IDL_MAP, CANISTER_TYPE, MANAGEMENT_PRINCIPAL_ID } from './constants';
+import { ChangeOwnerResponse, PutChunkResponse, PutMetaInfoResponse } from './canisters/video_canister/video_canister.did';
 
 // fetch needs to be available internally for the HttpAgent
 (global as any).fetch = fetch;
@@ -14,7 +14,7 @@ export const managementPrincipal = Principal.fromText(MANAGEMENT_PRINCIPAL_ID);
 let _identity: null | Identity = null;
 let _httpAgent: null | HttpAgent = null;
 
-export const getHttpAgent = async (identity: Identity) => {
+const getHttpAgent = async (identity: Identity) => {
   if (!_httpAgent || identity !== _identity) {
     _identity = identity;
     _httpAgent = new HttpAgent({
@@ -39,5 +39,16 @@ export const getCanisterActor = async (identity: Identity, canisterType: CANISTE
     throw Error(
       `Actor for canister of type <${canisterType}> with principal <${principal}> could not be created:` + error,
     );
+  }
+};
+
+export const executeVideoCanisterPut = async (func: Function, errorMessage: string) => {
+  try {
+    const response = (await func()) as ChangeOwnerResponse | PutChunkResponse | PutMetaInfoResponse;
+    if (!('success' in response)) {
+      throw new Error(Object.keys(response).at(0));
+    }
+  } catch (error) {
+    throw Error(`${errorMessage}: ` + error);
   }
 };

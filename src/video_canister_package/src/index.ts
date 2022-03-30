@@ -1,7 +1,7 @@
 import { Identity } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 
-import { getCanisterActor, managementPrincipal } from "./common";
+import { executeVideoCanisterPut, getCanisterActor, managementPrincipal } from "./common";
 import { MetaInfo } from "./canisters/video_canister/video_canister.did";
 import { IDL } from "@dfinity/candid";
 import { CANISTER_TYPE, CHUNK_SIZE, CREATION_CYCLES, SPAWN_PRINCIPAL_ID } from "./constants";
@@ -40,24 +40,24 @@ export async function uploadVideo(identity: Identity, walletId: Principal, video
 
   const videoActor = await getCanisterActor(identity, CANISTER_TYPE.VIDEO_CANISTER, videoPrincipal);
   const chunkNum = Math.floor(video.videoBuffer.length / CHUNK_SIZE) + 1;
-  const metaResponse = await videoActor.put_meta_info({
-    'name': video.name,
-    'description': video.description,
-    'chunk_num': chunkNum
-  }) as {'success': null};
-  if (!('success' in metaResponse)){
-    console.error(metaResponse);
-    throw Error("Could not put meta info into video canister");
-  }
+
+  await executeVideoCanisterPut(
+    () => videoActor.put_meta_info({
+      'name': video.name,
+      'description': video.description,
+      'chunk_num': chunkNum
+    }), 
+    "Could not put meta info into video canister"
+  );
 
   for (let i = 0; i < chunkNum; i++){
     const chunkSlice = video.videoBuffer.slice(i * CHUNK_SIZE, Math.min(video.videoBuffer.length, (i + 1) * CHUNK_SIZE ));
     const chunkArray = Array.from(chunkSlice);
-    const chunkResponse = await videoActor.put_chunk(i, chunkArray) as {'success': null};
-    if (!('success' in chunkResponse)){
-      console.error(chunkResponse);
-      throw Error("Could not put chunk " + i + " into the video canister");
-    }
+
+    await executeVideoCanisterPut(
+      () => videoActor.put_chunk(i, chunkArray),
+      `Could not put chunk <${i}> into the video canister`
+    );
   }
 
   //TODO Index canister
@@ -106,12 +106,10 @@ export async function changeOwner(oldIdentity: Identity, oldWallet: Principal, v
 async function changeVideoOwner(oldIdentity: Identity, videoPrincipal: Principal, newOwner: Principal){
   const videoCanister = await getCanisterActor(oldIdentity, CANISTER_TYPE.VIDEO_CANISTER, videoPrincipal);
 
-  let response = await videoCanister.change_owner(newOwner) as {'success': null};
-
-  if (!('success' in response)){
-    console.error(response);
-    throw Error("Could not change owner of video canister");
-  }
+  await executeVideoCanisterPut(
+    () => videoCanister.change_owner(newOwner),
+    `Could not change owner of video canister`
+  );
 }
 
 async function changeCanisterController(oldIdentity: Identity, oldWallet: Principal, videoPrincipal: Principal, newOwnerWallet: Principal){
