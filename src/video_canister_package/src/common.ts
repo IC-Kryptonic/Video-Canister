@@ -27,8 +27,15 @@ export const getHttpAgent = async (identity: Identity) => {
 export const getCanisterActor = async (identity: Identity, canisterType: CANISTER_TYPE, principal: Principal) => {
   const httpAgent = await getHttpAgent(identity);
   const idl = CANISTER_IDL_MAP.get(canisterType);
-  return Actor.createActor(idl, {
-    agent: httpAgent,
-    canisterId: principal,
-  });
+  try {
+    const actor = Actor.createActor(idl, {
+      agent: httpAgent,
+      canisterId: principal,
+    });
+    return actor;
+  } catch (error) {
+    throw Error(
+      `Actor for canister of type <${canisterType}> with principal <${principal}> could not be created:` + error,
+    );
+  }
 };

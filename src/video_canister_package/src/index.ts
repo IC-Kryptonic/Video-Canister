@@ -20,6 +20,7 @@ export interface CreationVideo{
   "videoBuffer": Buffer,
 }
 
+// TODO unsafe
 const spawnPrincipal = Principal.fromText(SPAWN_PRINCIPAL_ID); 
 
 export async function uploadVideo(identity: Identity, walletId: Principal, video: CreationVideo, cycles: bigint): Promise<Principal>{
