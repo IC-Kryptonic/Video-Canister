@@ -29,12 +29,15 @@ export async function uploadVideo(identity: Identity, walletId: Principal, video
     throw Error("Not enough cycles, need at least " + CREATION_CYCLES + " for video canister creation");
   }
   
-  let videoPrincipal = await createNewCanister(identity, walletId, CREATION_CYCLES);
+  const videoPrincipal = await createNewCanister(identity, walletId, CREATION_CYCLES);
   
   await checkController(identity, walletId, videoPrincipal);
 
-  await depositCycles(identity, walletId, videoPrincipal, cycles - CREATION_CYCLES);
-  
+  const leftoverCycles = cycles - CREATION_CYCLES;
+  if(leftoverCycles > 0) {
+    await depositCycles(identity, walletId, videoPrincipal, leftoverCycles);
+  }
+
   const videoActor = await getCanisterActor(identity, CANISTER_TYPE.VIDEO_CANISTER, videoPrincipal);
   const chunkNum = Math.floor(video.videoBuffer.length / CHUNK_SIZE) + 1;
   const metaResponse = await videoActor.put_meta_info({
