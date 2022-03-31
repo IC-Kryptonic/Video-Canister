@@ -20,6 +20,20 @@ export interface CreationVideo{
   "videoBuffer": Buffer,
 }
 
+interface WalletResponse {
+  created: Principal,
+  insufficient_funds: null,
+  canister_creation_error: null,
+  canister_installation_error: null,
+  change_controller_error: null,
+}
+
+interface RawWalletResponse {
+  Ok: {
+    return: Array<number>
+  }
+}
+
 // TODO unsafe
 const spawnPrincipal = Principal.fromText(SPAWN_PRINCIPAL_ID); 
 
@@ -142,7 +156,7 @@ async function changeCanisterController(oldIdentity: Identity, oldWallet: Princi
       method_name: "update_settings",
       args: [...Buffer.from(encodedArgs)],
       cycles: 0,
-    }) as Object;
+    }) as WalletResponse;
   
     if (!('Ok' in walletResponse)){
       throw Error(walletResponse.toString());
@@ -155,33 +169,37 @@ async function changeCanisterController(oldIdentity: Identity, oldWallet: Princi
 async function createNewCanister(identity: Identity, walletId: Principal, creationCycles: BigInt): Promise<Principal>{
   const walletActor = await getCanisterActor(identity, CANISTER_TYPE.WALLET_CANISTER, walletId);
 
-  const walletResponse = await walletActor.wallet_call({
-    canister: spawnPrincipal,
-    method_name: "create_new_canister",
-    args: [...Buffer.from(IDL.encode([IDL.Principal],[identity.getPrincipal()]))],
-    cycles: creationCycles,
-  }) as {'Ok': {'return': Array<number>}};
+  try {
+    const walletResponse = await walletActor.wallet_call({
+      canister: spawnPrincipal,
+      method_name: "create_new_canister",
+      args: [...Buffer.from(IDL.encode([IDL.Principal],[identity.getPrincipal()]))],
+      cycles: creationCycles,
+    }) as RawWalletResponse;
 
-  if ('Ok' in walletResponse){
-    const raw_response = walletResponse.Ok.return;
-    let response = IDL.decode([IDL.Variant({
-      "created": IDL.Principal,
-      "insufficient_funds": IDL.Null,
-      "canister_creation_error": IDL.Null,
-      "canister_installation_error": IDL.Null,
-      "cahnge_controller_error": IDL.Null,
-    })],
-    Buffer.from(raw_response))[0] as unknown as {'created' : Principal};
-    
-    if ('created' in response){
-      return response.created;
+    if ('Ok' in walletResponse){
+      const encodedResponse = walletResponse.Ok.return;
+      let response = IDL.decode(
+        [IDL.Variant({
+          "created": IDL.Principal,
+          "insufficient_funds": IDL.Null,
+          "canister_creation_error": IDL.Null,
+          "canister_installation_error": IDL.Null,
+          "change_controller_error": IDL.Null,
+        })],
+        Buffer.from(encodedResponse)
+      )[0] as unknown as WalletResponse;
+      
+      if ('created' in response){
+        return response.created;
+      } else {
+        throw Error(response.toString());
+      }
     } else {
-      console.error(response as unknown);
-      throw Error("Error creating video canister with spawn canister");
+      throw Error(walletResponse.toString());
     }
-  } else {
-    console.error(walletResponse);
-    throw Error("Error calling wallet for wallet_call");
+  } catch(error) {
+    throw Error("Error creating video canister with spawn canister: " + error);
   }
 }
 
