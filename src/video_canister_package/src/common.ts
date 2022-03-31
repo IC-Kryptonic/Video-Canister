@@ -3,7 +3,11 @@ import { Actor, HttpAgent, Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 
 import { CANISTER_IDL_MAP, CANISTER_TYPE, MANAGEMENT_PRINCIPAL_ID } from './constants';
-import { ChangeOwnerResponse, PutChunkResponse, PutMetaInfoResponse } from './canisters/video_canister/video_canister.did';
+import {
+  ChangeOwnerResponse,
+  PutChunkResponse,
+  PutMetaInfoResponse,
+} from './canisters/video_canister/video_canister.did';
 
 // fetch needs to be available internally for the HttpAgent
 (global as any).fetch = fetch;
