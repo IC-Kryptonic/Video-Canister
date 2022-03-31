@@ -20,12 +20,18 @@ export interface CreationVideo{
   "videoBuffer": Buffer,
 }
 
-interface WalletResponse {
+interface CreateNewCanisterResponse {
   created: Principal,
   insufficient_funds: null,
   canister_creation_error: null,
   canister_installation_error: null,
   change_controller_error: null,
+}
+
+interface CanisterStatusResponse {
+  settings: {
+    controllers : Principal[]
+  }
 }
 
 interface RawWalletResponse {
@@ -156,7 +162,7 @@ async function changeCanisterController(oldIdentity: Identity, oldWallet: Princi
       method_name: "update_settings",
       args: [...Buffer.from(encodedArgs)],
       cycles: 0,
-    }) as WalletResponse;
+    }) as CreateNewCanisterResponse;
   
     if (!('Ok' in walletResponse)){
       throw Error(walletResponse.toString());
@@ -188,7 +194,7 @@ async function createNewCanister(identity: Identity, walletId: Principal, creati
           "change_controller_error": IDL.Null,
         })],
         Buffer.from(encodedResponse)
-      )[0] as unknown as WalletResponse;
+      )[0] as unknown as CreateNewCanisterResponse;
       
       if ('created' in response){
         return response.created;
@@ -210,33 +216,36 @@ async function checkController(identity: Identity, wallet: Principal, video_cani
 
   const encoded_args = IDL.encode([IDL.Record({ canister_id: IDL.Principal})], [{'canister_id': video_canister}]);
 
-  const walletResponse = await walletActor.wallet_call({
-    canister: managementPrincipal,
-    method_name: "canister_status",
-    args: [...Buffer.from(encoded_args)],
-    cycles: 0,
-  }) as {'Ok' : { 'return' : Array<number>}};
+  try {
+    const walletResponse = await walletActor.wallet_call({
+      canister: managementPrincipal,
+      method_name: "canister_status",
+      args: [...Buffer.from(encoded_args)],
+      cycles: 0,
+    }) as RawWalletResponse;
 
-  if ('Ok' in walletResponse){
-    const raw_response = walletResponse.Ok.return;
-    let response = IDL.decode([IDL.Record({
-      settings: IDL.Record({
-        controllers: IDL.Vec(IDL.Principal),
-      }),
-    })],
-    Buffer.from(raw_response))[0] as unknown as {'settings': {
-      'controllers' : [Principal]
-    }};
-    
-    if (response.settings.controllers.length === 1 && response.settings.controllers[0].toText() === wallet.toText()){ //Wallet is controller of canister as it should be
-      return;
-    } else if (response.settings.controllers[0] === undefined){
-      throw Error("Video Canister has no controller");
-    } else {
-      throw Error("Video Canister controller is not wallet, instead it is " + response.settings.controllers[0]);
+    if ('Ok' in walletResponse){
+      const raw_response = walletResponse.Ok.return;
+      let response = IDL.decode([IDL.Record({
+        settings: IDL.Record({
+          controllers: IDL.Vec(IDL.Principal),
+        }),
+      })],
+      Buffer.from(raw_response))[0] as unknown as CanisterStatusResponse;
+
+      const controllers = response?.settings?.controllers || [];
+
+      if(controllers.length === 0) {
+        throw Error("Video canister has no controller");
+      } else if(controllers.length > 1) {
+        throw new Error("Video canister has too many controllers " + controllers);
+      } else {
+        const controllerIsWallet = controllers[0].toText() === wallet.toText();
+        if(!controllerIsWallet) throw new Error("Video Canister controller is not wallet, instead it is " + controllers[0]);
+      }
     }
-  } else {
-    throw Error("Wallet call failed");
+  } catch(error) {
+    throw new Error("Check Controller Error: " + error);
   }
 }
 
