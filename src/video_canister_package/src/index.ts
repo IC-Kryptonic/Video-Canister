@@ -254,18 +254,25 @@ async function depositCycles(identity: Identity, wallet: Principal, video_canist
 
   const encoded_args = IDL.encode([IDL.Record({ canister_id: IDL.Principal})], [{'canister_id': video_canister}]);
 
-  const walletResponse = await walletActor.wallet_call({
-    canister: managementPrincipal,
-    method_name: "deposit_cycles",
-    args: [...Buffer.from(encoded_args)],
-    cycles: cycles,
-  }) as {'Ok' : { 'return' : Array<number>}};
+  try {
+    const walletResponse = await walletActor.wallet_call({
+      canister: managementPrincipal,
+      method_name: "deposit_cycles",
+      args: [...Buffer.from(encoded_args)],
+      cycles: cycles,
+    }) as RawWalletResponse;
 
-  if ('Ok' in walletResponse){
-    const raw_response = walletResponse.Ok.return;
-    IDL.decode([], Buffer.from(raw_response))[0];
-  } else {
-    console.error(walletResponse);
-    throw Error("Wallet call failed");
+    if ('Ok' in walletResponse){
+      /*
+      TODO decode and check wallet response
+      const encodedResponse = walletResponse.Ok.return;
+      const response = IDL.decode([], Buffer.from(raw_response))[0];
+      */
+    } else {
+      console.error(walletResponse);
+      throw Error(walletResponse.toString());
+    }
+  } catch(error) {
+    throw Error("Unable to deposit cycles " + error);
   }
 }
