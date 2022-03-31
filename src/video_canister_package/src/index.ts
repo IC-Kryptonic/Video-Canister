@@ -36,7 +36,11 @@ export async function uploadVideo(
   }
 
   const videoActor = await getCanisterActor(identity, CANISTER_TYPE.VIDEO_CANISTER, videoPrincipal);
-  const chunkNum = Math.floor(video.videoBuffer.length / CHUNK_SIZE) + 1;
+
+  let chunkNum = 0;
+  if (video.videoBuffer.length !== 0) {
+    chunkNum = Math.floor(video.videoBuffer.length / CHUNK_SIZE) + 1;
+  }
 
   await executeVideoCanisterPut(
     () =>
