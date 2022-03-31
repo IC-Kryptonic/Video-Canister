@@ -1,59 +1,26 @@
 import { Identity } from "@dfinity/agent";
+import { IDL } from "@dfinity/candid";
 import { Principal } from "@dfinity/principal";
 
-import { executeVideoCanisterPut, getCanisterActor, managementPrincipal } from "./common";
 import { MetaInfo } from "./canisters/video_canister/video_canister.did";
-import { IDL } from "@dfinity/candid";
-import { CANISTER_TYPE, CHUNK_SIZE, CREATION_CYCLES, SPAWN_PRINCIPAL_ID } from "./constants";
-
-export interface Video{
-  "name": string,
-  "description": string,
-  "version": bigint,
-  "owner": Principal,
-  "videoBuffer": Buffer,
-}
-
-export interface CreationVideo{
-  "name": string,
-  "description": string,
-  "videoBuffer": Buffer,
-}
-
-interface CreateNewCanisterResponse {
-  created: Principal,
-  insufficient_funds: null,
-  canister_creation_error: null,
-  canister_installation_error: null,
-  change_controller_error: null,
-}
-
-interface CanisterStatusResponse {
-  settings: {
-    controllers : Principal[]
-  }
-}
-
-interface RawWalletResponse {
-  Ok: {
-    return: Array<number>
-  }
-}
+import { executeVideoCanisterPut, getCanisterActor, managementPrincipal } from "./common";
+import { CANISTER_TYPE, CHUNK_SIZE, REQUIRED_CYCLES, SPAWN_PRINCIPAL_ID } from "./constants";
+import { CanisterStatusResponse, CreateNewCanisterResponse, VideoToStore, RawWalletResponse, Video } from "./interfaces";
 
 // TODO unsafe
 const spawnPrincipal = Principal.fromText(SPAWN_PRINCIPAL_ID); 
 
-export async function uploadVideo(identity: Identity, walletId: Principal, video: CreationVideo, cycles: bigint): Promise<Principal>{
+export async function uploadVideo(identity: Identity, walletId: Principal, video: VideoToStore, cycles: bigint): Promise<Principal>{
 
-  if (cycles < CREATION_CYCLES){
-    throw Error("Not enough cycles, need at least " + CREATION_CYCLES + " for video canister creation");
+  if (cycles < REQUIRED_CYCLES){
+    throw Error("Not enough cycles, need at least " + REQUIRED_CYCLES + " for video canister creation");
   }
   
-  const videoPrincipal = await createNewCanister(identity, walletId, CREATION_CYCLES);
+  const videoPrincipal = await createNewCanister(identity, walletId, REQUIRED_CYCLES);
   
   await checkController(identity, walletId, videoPrincipal);
 
-  const leftoverCycles = cycles - CREATION_CYCLES;
+  const leftoverCycles = cycles - REQUIRED_CYCLES;
   if(leftoverCycles > 0) {
     await depositCycles(identity, walletId, videoPrincipal, leftoverCycles);
   }

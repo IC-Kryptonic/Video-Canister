@@ -9,7 +9,7 @@ export const SPAWN_PRINCIPAL_ID = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
 // TODO adjust for mainnet
 export const MANAGEMENT_PRINCIPAL_ID = 'aaaaa-aa';
 
-export const CREATION_CYCLES: bigint = BigInt(200_000_000_000);
+export const REQUIRED_CYCLES: bigint = BigInt(200_000_000_000);
 
 export const CHUNK_SIZE = 1024;
 
