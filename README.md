@@ -1,4 +1,4 @@
-Disclaimer: This ReadMe is a WIP!!
+Disclaimer: This project & read-me is a WIP!!
 
 # Decentralized Video Storage and Streaming on the Internet Computer
 
@@ -48,5 +48,57 @@ We define the following four main user actions for our API:
 
 # Getting started
 
-Prerequisites:
-Follow the
+## Local development
+
+### Prerequisites:
+
+Follow [this](https://smartcontracts.org/docs/rust-guide/rust-quickstart.html) DFINITY tutorial to set up a local Internet Computer Replica.
+
+### Installing the dependencies:
+
+Run `npm install` in the following directories:
+
+- `Video-Canister/`
+- `Video-Canister/src/video_canister_package/`
+
+### Deploying the Spawn Canister on the local replica
+
+Run `./deploy.sh` in the root directory.
+
+## Integrating our npm package
+
+Install the `TODO :)` dependency through npm.
+
+Then you can import the following functions from the package:
+
+1. Upload a video
+
+```
+function uploadVideo(
+  identity: Identity,
+  walletId: Principal,
+  video: VideoToStore,
+  cycles: bigint,
+)
+```
+
+2. Stream a video
+
+```
+function getVideo(
+  identity: Identity,
+  principal: Principal
+): Promise<Video>
+```
+
+3. Change the owner of a video
+
+```
+function changeOwner(
+  oldIdentity: Identity,
+  oldWallet: Principal,
+  videoPrincipal: Principal,
+  newOwner: Principal,
+  newOwnerWallet: Principal,
+)
+```
