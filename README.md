@@ -24,3 +24,29 @@ Our solution consists of four components:
 # User Actions
 
 We define the following four main user actions for our API:
+
+1. Uploading a video:
+   ![](https://github.com/IC-Kryptonic/Video-Canister/blob/initial-readme/docs/diagrams/src/upload_video.png?raw=true)
+
+#
+
+2. Streaming / Getting a video:
+
+![](https://github.com/IC-Kryptonic/Video-Canister/blob/initial-readme/docs/diagrams/src/get_video.png?raw=true)
+
+#
+
+3. Getting the principals (the smart contract identifier) for all uploaded videos from a specific creator:
+
+![](https://github.com/IC-Kryptonic/Video-Canister/blob/initial-readme/docs/diagrams/src/get_my_videos.png?raw=true)
+
+#
+
+4. Changing the owner of a video. Technically, this means that the owner of the Smart Contract that a video is stored in is changed. This is useful if you use the video storage for NFTs, because if you transfer a token representing a video, the new token owner should also control the stored video:
+
+![](https://github.com/IC-Kryptonic/Video-Canister/blob/initial-readme/docs/diagrams/src/change_owner.png?raw=true)
+
+# Getting started
+
+Prerequisites:
+Follow the
