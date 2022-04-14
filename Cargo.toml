@@ -3,4 +3,5 @@
 members = [
     "src/video_canister",
     "src/spawn_canister",
+    "src/index_canister",
 ]
