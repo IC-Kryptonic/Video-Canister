@@ -42,5 +42,4 @@ popd
 
 #clean up
 dfx identity use default
-dfx identity remove alice
 dfx stop

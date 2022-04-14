@@ -1,7 +1,8 @@
 import { AnonymousIdentity} from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { Secp256k1KeyIdentity } from '@dfinity/identity';
-import { CreationVideo, getVideo, uploadVideo, changeOwner} from '../index';
+import { getVideo, uploadVideo, changeOwner} from '../index';
+import { VideoToStore } from '../interfaces';
 
 jest.setTimeout(30_000);
 
@@ -16,7 +17,7 @@ test('getVideo', async () => {
 
 test('createVideo', async () => {
 
-    const video: CreationVideo = {
+    const video: VideoToStore = {
         "name": "test1",
         "description": "this is a desc",
         "videoBuffer": Buffer.from([0xCA,0xFF,0xEE])
@@ -39,7 +40,7 @@ test('createVideo', async () => {
 });
 
 test('changeOwner', async () => {
-    const video: CreationVideo = {
+    const video: VideoToStore = {
         "name": "test1",
         "description": "this is a desc",
         "videoBuffer": Buffer.from([0xCA,0xFF,0xEE])
@@ -48,7 +49,7 @@ test('changeOwner', async () => {
     const anon = new AnonymousIdentity();
     const anonWallet = Principal.fromText("rkp4c-7iaaa-aaaaa-aaaca-cai");
 
-    const creationCycles: bigint = BigInt(200_000_000_000);
+    const creationCycles: bigint = BigInt(300_000_000_000);
 
     const videoPrincipal: Principal = await uploadVideo(anon, anonWallet, video, creationCycles);
 

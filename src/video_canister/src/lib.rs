@@ -2,6 +2,11 @@ use ic_cdk::export::candid::{CandidType, Deserialize, Principal,};
 use ic_cdk_macros::{update, query, init, pre_upgrade, post_upgrade};
 use ic_cdk::storage;
 
+const CANISTER_VERSION: usize = 0usize;
+
+type Chunk = Vec<u8>;
+type Chunks = Vec<Chunk>;
+
 #[derive(CandidType, Deserialize)]
 pub struct PutMetaInfo{
     pub name: String,
@@ -60,11 +65,6 @@ pub enum ChangeOwnerResponse{
     MissingRights,
 }
 
-type Chunk = Vec<u8>;
-type Chunks = Vec<Chunk>;
-
-const CANISTER_VERSION: usize = 0usize;
-
 #[init]
 pub async fn init(owner: Principal){
     storage::get_mut::<MetaInfo>().owner = owner;
@@ -72,17 +72,18 @@ pub async fn init(owner: Principal){
 
 #[update]
 pub async fn put_meta_info(new_meta_info: PutMetaInfo) -> PutMetaInfoResponse{
-    let mut old_meta_info = storage::get_mut::<MetaInfo>();
-    if old_meta_info.owner != ic_cdk::caller() {
+    let mut existing_meta_info = storage::get_mut::<MetaInfo>();
+    if existing_meta_info.owner != ic_cdk::caller() {
         return PutMetaInfoResponse::MissingRights;
     } else {
-        old_meta_info.name = new_meta_info.name;
-        old_meta_info.description = new_meta_info.description;
+        existing_meta_info.name = new_meta_info.name;
+        existing_meta_info.description = new_meta_info.description;
 
-        //Resize array
-        if old_meta_info.chunk_num != new_meta_info.chunk_num{
-            let _old_chunks = std::mem::replace(storage::get_mut::<Chunks>(), vec![Vec::new(); new_meta_info.chunk_num]);
-            old_meta_info.chunk_num = new_meta_info.chunk_num;
+        //Resize chunk array
+        if existing_meta_info.chunk_num != new_meta_info.chunk_num{
+            let chunks = storage::get_mut::<Chunks>();
+            chunks.resize(new_meta_info.chunk_num, vec![]);
+            existing_meta_info.chunk_num = new_meta_info.chunk_num;
         }
 
         return PutMetaInfoResponse::Success;
@@ -125,7 +126,8 @@ pub async fn get_meta_info() -> &'static MetaInfo{
 
 #[query]
 pub async fn get_chunk(chunk_num: usize) -> Option<&'static Chunk>{
-    return storage::get::<Chunks>().get(chunk_num);
+    let chunks = storage::get::<Chunks>();
+    return chunks.get(chunk_num);
 }
 
 #[pre_upgrade]
@@ -144,5 +146,5 @@ fn post_upgrade() {
     meta_info.owner = old_meta_info.owner;
     meta_info.name = old_meta_info.name;
 
-    let _ = std::mem::replace(storage::get_mut::<Chunks>(), chunks);
+    *storage::get_mut::<Chunks>() = chunks;
 }

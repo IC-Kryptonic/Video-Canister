@@ -59,17 +59,18 @@ pub struct UpdateSettingsArg{
 
 static VIDEO_CANISTER_CODE: &[u8;  include_bytes!("../../../target/wasm32-unknown-unknown/release/video_canister_opt.wasm").len()] = include_bytes!("../../../target/wasm32-unknown-unknown/release/video_canister_opt.wasm");
 
-const MIN_CANISTER_CYCLES_REQUIERED: u64 = 200_000_000_000; //TODO rough guess, calculate correct costs
+const MIN_CANISTER_CYCLES_REQUIRED: u64 = 200_000_000_000; //TODO rough guess, calculate correct costs
 
 #[update]
 pub async fn create_new_canister(owner: Principal) -> CreateCanisterResponse{
 
-    let owner_wallet = ic_cdk::api::caller(); //call early before any callbacks
+    let owner_wallet = ic_cdk::api::caller(); //call early before any callbacks from calling other canisters
+    let available_cycles = call::msg_cycles_available();  
 
-    if call::msg_cycles_available() < MIN_CANISTER_CYCLES_REQUIERED{
+    if available_cycles < MIN_CANISTER_CYCLES_REQUIRED{
         return CreateCanisterResponse::InsufficientFunds;
     } else {
-        call::msg_cycles_accept(call::msg_cycles_available());
+        call::msg_cycles_accept(available_cycles);
     }
 
     let canister_princ = match create_canister_on_network().await{

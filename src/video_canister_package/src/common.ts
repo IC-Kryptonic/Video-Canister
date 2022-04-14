@@ -1,62 +1,58 @@
-import fetch from "node-fetch";
+import fetch from 'node-fetch';
+import { Actor, HttpAgent, Identity } from '@dfinity/agent';
+import { Principal } from '@dfinity/principal';
 
-import { Actor, HttpAgent, Identity } from "@dfinity/agent";
-import { Principal } from "@dfinity/principal";
+import { CANISTER_IDL_MAP, CANISTER_TYPE, MANAGEMENT_PRINCIPAL_ID } from './constants';
+import {
+  ChangeOwnerResponse,
+  PutChunkResponse,
+  PutMetaInfoResponse,
+} from './canisters/video_canister/video_canister.did';
 
-//import { canisterId as spawnCanisterId } from "./canisters/spawn_canister";
+// fetch needs to be available internally for the HttpAgent
+(global as any).fetch = fetch;
 
-import { idlFactory as videoCanisterIdl} from './canisters/video_canister/videoCanister_idl.did';
-import { idlFactory as spawnCanisterIdl} from './canisters/spawn_canister/spawnCanister_idl.did';
-import { idlFactory as managementCanisterIdl} from './canisters/management_canister/managementCanister_idl.did';
-import { idlFactory as walletCanisterIdl} from './canisters/wallet_canister/walletCanister_idl.did';
-
-(global as any).fetch = fetch; 
-
-export const managementPrincipal = Principal.fromText("aaaaa-aa");
+// TODO unsafe
+export const managementPrincipal = Principal.fromText(MANAGEMENT_PRINCIPAL_ID);
 
 let _identity: null | Identity = null;
 let _httpAgent: null | HttpAgent = null;
 
-export const getHttpAgent = async (identity: Identity) => {
-    if (!_httpAgent || identity !== _identity) {
-        _identity = identity;
-        _httpAgent = new HttpAgent({
-          identity,
-          host:"http://localhost:8000", //TODO dynamic
-        });
-        await _httpAgent.fetchRootKey();
+const getHttpAgent = async (identity: Identity) => {
+  if (!_httpAgent || identity !== _identity) {
+    _identity = identity;
+    _httpAgent = new HttpAgent({
+      identity,
+      host: 'http://localhost:8000', //TODO deployment
+    });
+    await _httpAgent.fetchRootKey();
+  }
+  return _httpAgent;
+};
+
+export const getCanisterActor = async (identity: Identity, canisterType: CANISTER_TYPE, principal: Principal) => {
+  const httpAgent = await getHttpAgent(identity);
+  const idl = CANISTER_IDL_MAP.get(canisterType);
+  try {
+    const actor = Actor.createActor(idl, {
+      agent: httpAgent,
+      canisterId: principal,
+    });
+    return actor;
+  } catch (error) {
+    throw Error(
+      `Actor for canister of type <${canisterType}> with principal <${principal}> could not be created:` + error,
+    );
+  }
+};
+
+export const executeVideoCanisterPut = async (func: Function, errorMessage: string) => {
+  try {
+    const response = (await func()) as ChangeOwnerResponse | PutChunkResponse | PutMetaInfoResponse;
+    if (!('success' in response)) {
+      throw new Error(Object.keys(response).at(0));
     }
-    return _httpAgent;
+  } catch (error) {
+    throw Error(`${errorMessage}: ` + error);
+  }
 };
-
-export const getVideoCanisterActor = async (identity: Identity, principal: Principal) => {
-  const httpAgent = await getHttpAgent(identity);
-  return Actor.createActor(videoCanisterIdl, {
-    agent: httpAgent,
-    canisterId: principal,
-  });
-};
-
-export const getSpawnCanisterActor = async (identity: Identity) => {
-  const httpAgent = await getHttpAgent(identity);
-  return Actor.createActor(spawnCanisterIdl, {
-    agent: httpAgent,
-    canisterId: "ryjl3-tyaaa-aaaaa-aaaba-cai"//TODO dynamic
-  });
-}
-
-export const getManagementCanisterActor = async (identity: Identity) => {
-  const httpAgent = await getHttpAgent(identity);
-  return Actor.createActor(managementCanisterIdl, {
-    agent: httpAgent,
-    canisterId: "aaaaa-aa"
-  });
-}
-
-export const getWalletCanisterActor = async (identity: Identity, canisterId: Principal) => {
-  const httpAgent = await getHttpAgent(identity);
-  return Actor.createActor(walletCanisterIdl, {
-    agent: httpAgent,
-    canisterId: canisterId, 
-  });
-}
