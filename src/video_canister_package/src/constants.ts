@@ -6,6 +6,7 @@ import { idlFactory as indexCanisterIdl } from './canisters/wallet_canister/wall
 
 // TODO adjust for mainnet
 export const SPAWN_PRINCIPAL_ID = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
+export const INDEX_PRINCIPAL_ID = 'rkp4c-7iaaa-aaaaa-aaaca-cai'
 
 // TODO adjust for mainnet
 export const MANAGEMENT_PRINCIPAL_ID = 'aaaaa-aa';

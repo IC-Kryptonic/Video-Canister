@@ -4,7 +4,7 @@ import { Principal } from '@dfinity/principal';
 
 import { MetaInfo } from './canisters/video_canister/video_canister.did';
 import { executeVideoCanisterPut, getCanisterActor, managementPrincipal } from './common';
-import { CANISTER_TYPE, CHUNK_SIZE, REQUIRED_CYCLES, SPAWN_PRINCIPAL_ID } from './constants';
+import { CANISTER_TYPE, CHUNK_SIZE, REQUIRED_CYCLES, SPAWN_PRINCIPAL_ID, INDEX_PRINCIPAL_ID } from './constants';
 import {
   CanisterStatusResponse,
   CreateNewCanisterResponse,
@@ -67,7 +67,7 @@ export async function uploadVideo(
   }
 
   if(save){
-    const indexActor = await getCanisterActor(identity, CANISTER_TYPE.INDEX_CANISTER, walletId);
+    const indexActor = await getCanisterActor(identity, CANISTER_TYPE.INDEX_CANISTER, Principal.fromText(INDEX_PRINCIPAL_ID));
     await indexActor.post_video(videoPrincipal);
   }
 
@@ -118,6 +118,11 @@ export async function changeOwner(
   await changeCanisterController(oldIdentity, oldWallet, videoPrincipal, newOwnerWallet);
 
   await changeVideoOwner(oldIdentity, videoPrincipal, newOwner);
+}
+
+export async function getMyVideos(identity: Identity): Promise<[Principal]> {
+    const indexActor = await getCanisterActor(identity, CANISTER_TYPE.INDEX_CANISTER, Principal.fromText(INDEX_PRINCIPAL_ID));
+    return await indexActor.get_my_videos() as [Principal];
 }
 
 async function changeVideoOwner(oldIdentity: Identity, videoPrincipal: Principal, newOwner: Principal) {
