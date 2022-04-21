@@ -11,3 +11,6 @@ ic-cdk-optimizer target/wasm32-unknown-unknown/release/video_canister.wasm -o ta
 
 #deploy spawn canister
 dfx deploy spawn_canister
+
+#deploy index canister
+dfx deploy index_canister

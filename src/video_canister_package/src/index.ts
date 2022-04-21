@@ -21,6 +21,7 @@ export async function uploadVideo(
   walletId: Principal,
   video: VideoToStore,
   cycles: bigint,
+  save: boolean
 ): Promise<Principal> {
   if (cycles < REQUIRED_CYCLES) {
     throw Error('Not enough cycles, need at least ' + REQUIRED_CYCLES + ' for video canister creation');
@@ -65,7 +66,10 @@ export async function uploadVideo(
     );
   }
 
-  //TODO Index canister
+  if(save){
+    const indexActor = await getCanisterActor(identity, CANISTER_TYPE.INDEX_CANISTER, walletId);
+    indexActor.post_video(videoPrincipal);
+  }
 
   return videoPrincipal;
 }
