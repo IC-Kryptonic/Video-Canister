@@ -68,7 +68,7 @@ export async function uploadVideo(
 
   if(save){
     const indexActor = await getCanisterActor(identity, CANISTER_TYPE.INDEX_CANISTER, walletId);
-    indexActor.post_video(videoPrincipal);
+    await indexActor.post_video(videoPrincipal);
   }
 
   return videoPrincipal;
