@@ -120,9 +120,15 @@ export async function changeOwner(
   await changeVideoOwner(oldIdentity, videoPrincipal, newOwner);
 }
 
-export async function getMyVideos(identity: Identity): Promise<[Principal]> {
+export async function getMyVideos(identity: Identity): Promise<Principal[]> {
     const indexActor = await getCanisterActor(identity, CANISTER_TYPE.INDEX_CANISTER, Principal.fromText(INDEX_PRINCIPAL_ID));
-    return await indexActor.get_my_videos() as [Principal];
+    const optVideos = await indexActor.get_my_videos() as [[Principal]];
+    
+    if (optVideos[0] === undefined){
+      return new Array<Principal>();
+    } else{
+      return optVideos[0];
+    }
 }
 
 async function changeVideoOwner(oldIdentity: Identity, videoPrincipal: Principal, newOwner: Principal) {

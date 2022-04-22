@@ -26,7 +26,7 @@ pub async fn post_video(video_id: Principal){
 pub async fn get_my_videos() -> Option<&'static HashSet<Principal>>{
     let caller = ic_cdk::api::caller();
     let store = storage::get_mut::<VideoStore>();
-
+    
     return store.get(&caller);
 }
 
