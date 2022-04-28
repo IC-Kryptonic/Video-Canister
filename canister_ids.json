@@ -1,0 +1,11 @@
+{
+  "index_canister": {
+    "ic": "fa7ig-piaaa-aaaal-qaxwa-cai"
+  },
+  "spawn_canister": {
+    "ic": "fvyzl-oaaaa-aaaal-qaxvq-cai"
+  },
+  "video_canister": {
+    "ic": "6ccli-2qaaa-aaaal-qavgq-cai"
+  }
+}
