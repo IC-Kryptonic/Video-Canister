@@ -1,7 +1,7 @@
 {
-  "name": "video_canister_package",
+  "name": "ic-video-storage",
   "version": "0.1.0",
-  "description": "Video Canister Package",
+  "description": "IC Video Storage",
   "main": "index.js",
   "files": [
     "lib/**/*"
@@ -11,7 +11,7 @@
     "build": "tsc",
     "test": "NODE_ENV=DEV SPAWN_PRINCIPAL_ID='ryjl3-tyaaa-aaaaa-aaaba-cai' INDEX_PRINCIPAL_ID='rkp4c-7iaaa-aaaaa-aaaca-cai' jest --config jestconfig.json"
   },
-  "author": "",
+  "author": "moritz, alwin",
   "license": "MIT",
   "dependencies": {
     "@dfinity/agent": "0.10.3",

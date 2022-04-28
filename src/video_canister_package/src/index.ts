@@ -13,6 +13,8 @@ import {
 } from './common';
 import { CANISTER_TYPE, CHUNK_SIZE, REQUIRED_CYCLES, INDEX_PRINCIPAL_ID, SPAWN_PRINCIPAL_ID } from './constants';
 import { VideoToStore, Video, StorageConfig, InternalStorageConfig } from './interfaces';
+// forward the export of interfaces that are relevant for the package user
+export { VideoToStore, Video, StorageConfig } from './interfaces';
 
 const defaultConfig: InternalStorageConfig = {
   spawnCanisterPrincipal: SPAWN_PRINCIPAL_ID,
