@@ -33,3 +33,15 @@ export interface RawWalletResponse {
     return: Array<number>;
   };
 }
+
+export interface StorageConfig {
+  spawnCanisterPrincipal?: string;
+  indexCanisterPrincipal?: string;
+  chunkSize?: number;
+}
+
+export interface InternalStorageConfig extends StorageConfig {
+  spawnCanisterPrincipal: string;
+  indexCanisterPrincipal: string;
+  chunkSize: number;
+}
