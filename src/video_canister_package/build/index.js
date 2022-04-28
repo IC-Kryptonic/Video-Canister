@@ -4,6 +4,8 @@ exports.ICVideoStorage = void 0;
 const principal_1 = require("@dfinity/principal");
 const common_1 = require("./common");
 const constants_1 = require("./constants");
+// forward the export of interfaces that are relevant for the package user
+// export { VideoToStore, Video, StorageConfig } from './interfaces';
 const defaultConfig = {
     spawnCanisterPrincipal: constants_1.SPAWN_PRINCIPAL_ID,
     indexCanisterPrincipal: constants_1.INDEX_PRINCIPAL_ID,

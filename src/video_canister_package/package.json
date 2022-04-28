@@ -1,11 +1,11 @@
 {
   "name": "ic-video-storage",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "description": "IC Video Storage",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
   "files": [
-    "lib/**/*"
+    "build/**/*"
   ],
   "scripts": {
     "start": "ts-node src/index",

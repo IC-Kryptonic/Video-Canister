@@ -1,7 +1,6 @@
 import { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { VideoToStore, Video, StorageConfig, InternalStorageConfig } from './interfaces';
-export { VideoToStore, Video, StorageConfig } from './interfaces';
 export declare class ICVideoStorage {
     config: InternalStorageConfig;
     constructor(config?: StorageConfig);
