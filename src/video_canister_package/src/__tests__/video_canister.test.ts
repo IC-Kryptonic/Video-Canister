@@ -10,9 +10,15 @@ const videoCanisterVersion = 0n;
 
 const anonWalletPrincipal = 'rno2w-sqaaa-aaaaa-aaacq-cai';
 
-const storage = new ICVideoStorage();
+test('initStorage', async () => {
+  const expectedStoreOnIndex = false;
+  const storage = new ICVideoStorage({ storeOnIndex: expectedStoreOnIndex });
+
+  expect(storage.config.storeOnIndex).toBe(expectedStoreOnIndex);
+});
 
 test('getVideo', async () => {
+  const storage = new ICVideoStorage();
   const video = await storage.getVideo(new AnonymousIdentity(), Principal.fromText('renrk-eyaaa-aaaaa-aaada-cai'));
 
   expect(video.name).toBe('test_name');
@@ -20,6 +26,7 @@ test('getVideo', async () => {
 });
 
 test('createVideo', async () => {
+  const storage = new ICVideoStorage({ storeOnIndex: false });
   const video: VideoToStore = {
     name: 'test1',
     description: 'this is a desc',
@@ -31,7 +38,7 @@ test('createVideo', async () => {
 
   const creationCycles: bigint = BigInt(200_000_000_000);
 
-  const principal: Principal = await storage.uploadVideo(anon, anonWallet, video, creationCycles, false);
+  const principal: Principal = await storage.uploadVideo(anon, anonWallet, video, creationCycles);
 
   const uploadedVideo = await storage.getVideo(anon, principal);
 
@@ -43,6 +50,7 @@ test('createVideo', async () => {
 });
 
 test('changeOwner', async () => {
+  const storage = new ICVideoStorage({ storeOnIndex: false });
   const video: VideoToStore = {
     name: 'test1',
     description: 'this is a desc',
@@ -54,7 +62,7 @@ test('changeOwner', async () => {
 
   const creationCycles: bigint = BigInt(300_000_000_000);
 
-  const videoPrincipal: Principal = await storage.uploadVideo(anon, anonWallet, video, creationCycles, false);
+  const videoPrincipal: Principal = await storage.uploadVideo(anon, anonWallet, video, creationCycles);
 
   const newOwnerIdentity = Secp256k1KeyIdentity.generate();
   const newOwner = newOwnerIdentity.getPrincipal();
@@ -72,6 +80,7 @@ test('changeOwner', async () => {
 });
 
 test('indexVideo', async () => {
+  const storage = new ICVideoStorage();
   const video: VideoToStore = {
     name: 'test1',
     description: 'this is a desc',
@@ -83,7 +92,7 @@ test('indexVideo', async () => {
 
   const creationCycles: bigint = BigInt(200_000_000_000);
 
-  const videoPrincipal: Principal = await storage.uploadVideo(anon, anonWallet, video, creationCycles, true);
+  const videoPrincipal: Principal = await storage.uploadVideo(anon, anonWallet, video, creationCycles);
 
   const myVideos: Principal[] = await storage.getMyVideos(anon);
 

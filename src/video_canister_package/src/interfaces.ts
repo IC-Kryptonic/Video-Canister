@@ -38,10 +38,12 @@ export interface StorageConfig {
   spawnCanisterPrincipal?: string;
   indexCanisterPrincipal?: string;
   chunkSize?: number;
+  storeOnIndex?: boolean;
 }
 
 export interface InternalStorageConfig extends StorageConfig {
   spawnCanisterPrincipal: string;
   indexCanisterPrincipal: string;
   chunkSize: number;
+  storeOnIndex: boolean;
 }

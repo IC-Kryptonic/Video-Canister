@@ -3,7 +3,7 @@ import { Actor, HttpAgent, Identity } from '@dfinity/agent';
 import { IDL } from '@dfinity/candid';
 import { Principal } from '@dfinity/principal';
 
-import { CANISTER_IDL_MAP, CANISTER_TYPE, MANAGEMENT_PRINCIPAL_ID, SPAWN_PRINCIPAL_ID } from './constants';
+import { CANISTER_IDL_MAP, CANISTER_TYPE, MANAGEMENT_PRINCIPAL_ID } from './constants';
 import {
   ChangeOwnerResponse,
   PutChunkResponse,
@@ -14,9 +14,7 @@ import { CanisterStatusResponse, CreateNewCanisterResponse, RawWalletResponse } 
 // fetch needs to be available internally for the HttpAgent
 (global as any).fetch = fetch;
 
-// TODO unsafe
 export const managementPrincipal = Principal.fromText(MANAGEMENT_PRINCIPAL_ID);
-const spawnPrincipal = Principal.fromText(SPAWN_PRINCIPAL_ID);
 
 let _identity: null | Identity = null;
 let _httpAgent: null | HttpAgent = null;
@@ -119,10 +117,12 @@ export async function createNewCanister(
   identity: Identity,
   walletId: Principal,
   creationCycles: BigInt,
+  spawnCanisterPrincipal: string,
 ): Promise<Principal> {
   const walletActor = await getCanisterActor(identity, CANISTER_TYPE.WALLET_CANISTER, walletId);
 
   try {
+    const spawnPrincipal = Principal.fromText(spawnCanisterPrincipal);
     const walletResponse = (await walletActor.wallet_call({
       canister: spawnPrincipal,
       method_name: 'create_new_canister',

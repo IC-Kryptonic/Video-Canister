@@ -11,22 +11,41 @@ import {
   executeVideoCanisterPut,
   getCanisterActor,
 } from './common';
-import { CANISTER_TYPE, CHUNK_SIZE, REQUIRED_CYCLES, INDEX_PRINCIPAL_ID } from './constants';
-import { VideoToStore, Video } from './interfaces';
+import { CANISTER_TYPE, CHUNK_SIZE, REQUIRED_CYCLES, INDEX_PRINCIPAL_ID, SPAWN_PRINCIPAL_ID } from './constants';
+import { VideoToStore, Video, StorageConfig, InternalStorageConfig } from './interfaces';
+
+const defaultConfig: InternalStorageConfig = {
+  spawnCanisterPrincipal: SPAWN_PRINCIPAL_ID,
+  indexCanisterPrincipal: INDEX_PRINCIPAL_ID,
+  chunkSize: CHUNK_SIZE,
+  storeOnIndex: true,
+};
 
 export class ICVideoStorage {
-  async uploadVideo(
-    identity: Identity,
-    walletId: Principal,
-    video: VideoToStore,
-    cycles: bigint,
-    save: boolean,
-  ): Promise<Principal> {
+  config: InternalStorageConfig = JSON.parse(JSON.stringify(defaultConfig));
+
+  constructor(config?: StorageConfig) {
+    if (config) this.updateConfig(config);
+  }
+
+  updateConfig(config: StorageConfig) {
+    if (config.chunkSize) this.config.chunkSize = config.chunkSize;
+    if (config.storeOnIndex !== undefined) this.config.storeOnIndex = config.storeOnIndex;
+    if (config.indexCanisterPrincipal) this.config.indexCanisterPrincipal = config.indexCanisterPrincipal;
+    if (config.spawnCanisterPrincipal) this.config.spawnCanisterPrincipal = config.spawnCanisterPrincipal;
+  }
+
+  async uploadVideo(identity: Identity, walletId: Principal, video: VideoToStore, cycles: bigint): Promise<Principal> {
     if (cycles < REQUIRED_CYCLES) {
       throw Error('Not enough cycles, need at least ' + REQUIRED_CYCLES + ' for video canister creation');
     }
 
-    const videoPrincipal = await createNewCanister(identity, walletId, REQUIRED_CYCLES);
+    const videoPrincipal = await createNewCanister(
+      identity,
+      walletId,
+      REQUIRED_CYCLES,
+      this.config.spawnCanisterPrincipal,
+    );
 
     await checkController(identity, walletId, videoPrincipal);
 
@@ -39,7 +58,7 @@ export class ICVideoStorage {
 
     let chunkNum = 0;
     if (video.videoBuffer.length !== 0) {
-      chunkNum = Math.floor(video.videoBuffer.length / CHUNK_SIZE) + 1;
+      chunkNum = Math.floor(video.videoBuffer.length / this.config.chunkSize) + 1;
     }
 
     await executeVideoCanisterPut(
@@ -54,8 +73,8 @@ export class ICVideoStorage {
 
     for (let i = 0; i < chunkNum; i++) {
       const chunkSlice = video.videoBuffer.slice(
-        i * CHUNK_SIZE,
-        Math.min(video.videoBuffer.length, (i + 1) * CHUNK_SIZE),
+        i * this.config.chunkSize,
+        Math.min(video.videoBuffer.length, (i + 1) * this.config.chunkSize),
       );
       const chunkArray = Array.from(chunkSlice);
 
@@ -65,11 +84,11 @@ export class ICVideoStorage {
       );
     }
 
-    if (save) {
+    if (this.config.storeOnIndex) {
       const indexActor = await getCanisterActor(
         identity,
         CANISTER_TYPE.INDEX_CANISTER,
-        Principal.fromText(INDEX_PRINCIPAL_ID),
+        Principal.fromText(this.config.indexCanisterPrincipal),
       );
       await indexActor.post_video(videoPrincipal);
     }
@@ -127,7 +146,7 @@ export class ICVideoStorage {
     const indexActor = await getCanisterActor(
       identity,
       CANISTER_TYPE.INDEX_CANISTER,
-      Principal.fromText(INDEX_PRINCIPAL_ID),
+      Principal.fromText(this.config.indexCanisterPrincipal),
     );
     const optVideos = (await indexActor.get_my_videos()) as [[Principal]];
 
