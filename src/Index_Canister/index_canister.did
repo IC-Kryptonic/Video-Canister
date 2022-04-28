@@ -1,4 +1,0 @@
-service : () -> {
-    "post_video" (principal) -> ();
-    "get_my_videos" () -> (vec principal) query;
-}

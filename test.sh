@@ -20,6 +20,8 @@ ic-cdk-optimizer target/wasm32-unknown-unknown/release/video_canister.wasm -o ta
 #deploy spawn canister
 dfx deploy spawn_canister
 
+#deploy index canister
+dfx deploy index_canister
 
 #create test identities with wallets
 
@@ -37,6 +39,7 @@ dfx canister call $video_principal put_chunk '(0 : nat64, blob "\CA\FF\EE")'
 
 #start package tests
 pushd src/video_canister_package
+npm install
 npm test
 popd
 
