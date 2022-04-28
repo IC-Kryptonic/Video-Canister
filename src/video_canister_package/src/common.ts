@@ -3,7 +3,7 @@ import { Actor, HttpAgent, Identity } from '@dfinity/agent';
 import { IDL } from '@dfinity/candid';
 import { Principal } from '@dfinity/principal';
 
-import { CANISTER_IDL_MAP, CANISTER_TYPE, MANAGEMENT_PRINCIPAL_ID } from './constants';
+import { CANISTER_IDL_MAP, CANISTER_TYPE, DEV_MODE, MANAGEMENT_PRINCIPAL_ID } from './constants';
 import {
   ChangeOwnerResponse,
   PutChunkResponse,
@@ -24,7 +24,7 @@ const getHttpAgent = async (identity: Identity) => {
     _identity = identity;
     _httpAgent = new HttpAgent({
       identity,
-      host: 'http://localhost:8000', //TODO deployment
+      host: DEV_MODE ? 'http://localhost:8000' : 'https://ic0.app',
     });
     await _httpAgent.fetchRootKey();
   }

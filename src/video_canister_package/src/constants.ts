@@ -6,7 +6,7 @@ import { idlFactory as managementCanisterIdl } from './canisters/management_cani
 import { idlFactory as walletCanisterIdl } from './canisters/wallet_canister/walletCanister_idl.did';
 import { idlFactory as indexCanisterIdl } from './canisters/index_canister/indexCanister_idl.did';
 
-const DEV_MODE = process.env.NODE_ENV === 'DEV';
+export const DEV_MODE = process.env.NODE_ENV === 'DEV';
 
 // TODO adjust for mainnet
 export const SPAWN_PRINCIPAL_ID = DEV_MODE ? process.env.SPAWN_PRINCIPAL_ID || '' : 'ryjl3-tyaaa-aaaaa-aaaba-cai';
