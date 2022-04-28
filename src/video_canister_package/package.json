@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "IC Video Storage",
   "main": "index.js",
+  "types": "index.d.ts",
   "files": [
     "lib/**/*"
   ],
