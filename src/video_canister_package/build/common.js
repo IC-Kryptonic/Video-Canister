@@ -19,7 +19,7 @@ const getHttpAgent = async (identity) => {
         _identity = identity;
         _httpAgent = new agent_1.HttpAgent({
             identity,
-            host: 'http://localhost:8000', //TODO deployment
+            host: constants_1.DEV_MODE ? 'http://localhost:8000' : 'https://ic0.app',
         });
         await _httpAgent.fetchRootKey();
     }

@@ -1,3 +1,4 @@
+export declare const DEV_MODE: boolean;
 export declare const SPAWN_PRINCIPAL_ID: string;
 export declare const INDEX_PRINCIPAL_ID: string;
 export declare const MANAGEMENT_PRINCIPAL_ID = "aaaaa-aa";
