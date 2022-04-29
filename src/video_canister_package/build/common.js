@@ -36,6 +36,7 @@ const getCanisterActor = async (identity, canisterType, principal) => {
         return actor;
     }
     catch (error) {
+        console.error(error);
         throw Error(`Actor for canister of type <${canisterType}> with principal <${principal}> could not be created:` + error);
     }
 };
@@ -48,6 +49,7 @@ const executeVideoCanisterPut = async (func, errorMessage) => {
         }
     }
     catch (error) {
+        console.error(error);
         throw Error(`${errorMessage}: ` + error);
     }
 };
@@ -88,10 +90,12 @@ async function changeCanisterController(oldIdentity, oldWallet, videoPrincipal, 
             cycles: 0,
         }));
         if (!('Ok' in walletResponse)) {
+            console.error(walletResponse);
             throw Error(walletResponse.toString());
         }
     }
     catch (error) {
+        console.error(error);
         throw Error('Unable to change canister controller: ' + error);
     }
 }
@@ -121,14 +125,17 @@ async function createNewCanister(identity, walletId, creationCycles, spawnCanist
                 return response.created;
             }
             else {
+                console.error(response);
                 throw Error(response.toString());
             }
         }
         else {
+            console.error(walletResponse);
             throw Error(walletResponse.toString());
         }
     }
     catch (error) {
+        console.error(error);
         throw Error('Error creating video canister with spawn canister: ' + error);
     }
 }

@@ -48,11 +48,13 @@ class ICVideoStorage {
             description: video.description,
             chunk_num: chunkNum,
         }), 'Could not put meta info into video canister');
+        const promises = [];
         for (let i = 0; i < chunkNum; i++) {
             const chunkSlice = video.videoBuffer.slice(i * this.config.chunkSize, Math.min(video.videoBuffer.length, (i + 1) * this.config.chunkSize));
             const chunkArray = Array.from(chunkSlice);
-            await (0, common_1.executeVideoCanisterPut)(() => videoActor.put_chunk(i, chunkArray), `Could not put chunk <${i}> into the video canister`);
+            promises.push((0, common_1.executeVideoCanisterPut)(() => videoActor.put_chunk(i, chunkArray), `Could not put chunk <${i}> into the video canister`));
         }
+        await Promise.all(promises);
         if (this.config.storeOnIndex) {
             const indexActor = await (0, common_1.getCanisterActor)(identity, "INDEX_CANISTER" /* INDEX_CANISTER */, principal_1.Principal.fromText(this.config.indexCanisterPrincipal));
             await indexActor.post_video(videoPrincipal);
@@ -84,6 +86,7 @@ class ICVideoStorage {
             };
         }
         catch (error) {
+            console.error(error);
             throw new Error('Unable to query video: ' + error);
         }
     }
