@@ -60,6 +60,31 @@ export const executeVideoCanisterPut = async (func: Function, errorMessage: stri
   }
 };
 
+export const uploadChunk = async (func: Function, errorMessage: string) => {
+  const uploadTriesPerChunk = 3;
+  let uploadSuccessful = false;
+  let lastError: string = '';
+
+  for (let i = 0; i < uploadTriesPerChunk; i++) {
+    try {
+      const response = (await func()) as ChangeOwnerResponse | PutChunkResponse | PutMetaInfoResponse;
+      if (!('success' in response)) {
+        throw new Error(Object.keys(response).at(0));
+      } else {
+        uploadSuccessful = true;
+        break;
+      }
+    } catch (error) {
+      console.error(error);
+      lastError = `${errorMessage}: ` + error;
+    }
+  }
+
+  if (!uploadSuccessful) {
+    throw new Error(lastError);
+  }
+};
+
 export async function changeVideoOwner(oldIdentity: Identity, videoPrincipal: Principal, newOwner: Principal) {
   const videoCanister = await getCanisterActor(oldIdentity, CANISTER_TYPE.VIDEO_CANISTER, videoPrincipal);
 

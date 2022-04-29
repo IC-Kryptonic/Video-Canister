@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.depositCycles = exports.checkController = exports.createNewCanister = exports.changeCanisterController = exports.changeVideoOwner = exports.executeVideoCanisterPut = exports.getCanisterActor = exports.managementPrincipal = void 0;
+exports.depositCycles = exports.checkController = exports.createNewCanister = exports.changeCanisterController = exports.changeVideoOwner = exports.uploadChunk = exports.executeVideoCanisterPut = exports.getCanisterActor = exports.managementPrincipal = void 0;
 const node_fetch_1 = __importDefault(require("node-fetch"));
 const agent_1 = require("@dfinity/agent");
 const candid_1 = require("@dfinity/candid");
@@ -54,6 +54,31 @@ const executeVideoCanisterPut = async (func, errorMessage) => {
     }
 };
 exports.executeVideoCanisterPut = executeVideoCanisterPut;
+const uploadChunk = async (func, errorMessage) => {
+    const uploadTriesPerChunk = 3;
+    let uploadSuccessful = false;
+    let lastError = '';
+    for (let i = 0; i < uploadTriesPerChunk; i++) {
+        try {
+            const response = (await func());
+            if (!('success' in response)) {
+                throw new Error(Object.keys(response).at(0));
+            }
+            else {
+                uploadSuccessful = true;
+                break;
+            }
+        }
+        catch (error) {
+            console.error(error);
+            lastError = `${errorMessage}: ` + error;
+        }
+    }
+    if (!uploadSuccessful) {
+        throw new Error(lastError);
+    }
+};
+exports.uploadChunk = uploadChunk;
 async function changeVideoOwner(oldIdentity, videoPrincipal, newOwner) {
     const videoCanister = await (0, exports.getCanisterActor)(oldIdentity, "VIDEO_CANISTER" /* VIDEO_CANISTER */, videoPrincipal);
     await (0, exports.executeVideoCanisterPut)(() => videoCanister.change_owner(newOwner), `Could not change owner of video canister`);

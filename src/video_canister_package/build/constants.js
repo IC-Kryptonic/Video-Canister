@@ -13,7 +13,7 @@ exports.SPAWN_PRINCIPAL_ID = exports.DEV_MODE ? process.env.SPAWN_PRINCIPAL_ID |
 exports.INDEX_PRINCIPAL_ID = exports.DEV_MODE ? process.env.INDEX_PRINCIPAL_ID || '' : 'rkp4c-7iaaa-aaaaa-aaaca-cai';
 exports.MANAGEMENT_PRINCIPAL_ID = 'aaaaa-aa';
 exports.REQUIRED_CYCLES = BigInt(200000000000);
-exports.CHUNK_SIZE = 1024;
+exports.CHUNK_SIZE = 100000;
 // TODO define types for idls
 exports.CANISTER_IDL_MAP = new Map([
     ["MANAGEMENT_CANISTER" /* MANAGEMENT_CANISTER */, managementCanister_idl_did_1.idlFactory],

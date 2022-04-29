@@ -10,6 +10,7 @@ import {
   depositCycles,
   executeVideoCanisterPut,
   getCanisterActor,
+  uploadChunk,
 } from './common';
 import { CANISTER_TYPE, CHUNK_SIZE, REQUIRED_CYCLES, INDEX_PRINCIPAL_ID, SPAWN_PRINCIPAL_ID } from './constants';
 import { VideoToStore, Video, StorageConfig, InternalStorageConfig } from './interfaces';
@@ -82,10 +83,7 @@ export class ICVideoStorage {
       const chunkArray = Array.from(chunkSlice);
 
       promises.push(
-        executeVideoCanisterPut(
-          () => videoActor.put_chunk(i, chunkArray),
-          `Could not put chunk <${i}> into the video canister`,
-        ),
+        uploadChunk(() => videoActor.put_chunk(i, chunkArray), `Could not put chunk <${i}> into the video canister`),
       );
     }
     await Promise.all(promises);

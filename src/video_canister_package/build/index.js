@@ -52,7 +52,7 @@ class ICVideoStorage {
         for (let i = 0; i < chunkNum; i++) {
             const chunkSlice = video.videoBuffer.slice(i * this.config.chunkSize, Math.min(video.videoBuffer.length, (i + 1) * this.config.chunkSize));
             const chunkArray = Array.from(chunkSlice);
-            promises.push((0, common_1.executeVideoCanisterPut)(() => videoActor.put_chunk(i, chunkArray), `Could not put chunk <${i}> into the video canister`));
+            promises.push((0, common_1.uploadChunk)(() => videoActor.put_chunk(i, chunkArray), `Could not put chunk <${i}> into the video canister`));
         }
         await Promise.all(promises);
         if (this.config.storeOnIndex) {

@@ -16,7 +16,7 @@ export const MANAGEMENT_PRINCIPAL_ID = 'aaaaa-aa';
 
 export const REQUIRED_CYCLES: bigint = BigInt(200_000_000_000);
 
-export const CHUNK_SIZE = 1024;
+export const CHUNK_SIZE = 100000;
 
 export const enum CANISTER_TYPE {
   'VIDEO_CANISTER' = 'VIDEO_CANISTER',
