@@ -11,13 +11,13 @@ pub enum CreateCanisterResponse{
     InsufficientFunds,
 
     #[serde(rename = "canister_creation_error")]
-    CanisterCreationError,
+    CanisterCreationError(String),
 
     #[serde(rename = "canister_installation_error")]
-    CanisterInstallationError,
+    CanisterInstallationError(String),
 
     #[serde(rename = "change_controller_error")]
-    ChangeControllerError,
+    ChangeControllerError(String),
 }
 
 #[derive(CandidType, Deserialize)]
@@ -76,16 +76,16 @@ pub async fn create_new_canister(owner: Principal) -> CreateCanisterResponse{
     let canister_princ = match create_canister_on_network().await{
         Ok(new_princ) => new_princ,
         Err(_err_str) => {
-            return CreateCanisterResponse::CanisterCreationError;
+            return CreateCanisterResponse::CanisterCreationError(_err_str);
         }
     };
 
     if let Err(_err_str) = install_video_canister(canister_princ.clone(), &owner).await{
-        return CreateCanisterResponse::CanisterInstallationError;
+        return CreateCanisterResponse::CanisterInstallationError(_err_str);
     };
 
     if let Err(_err_str) = change_controller_to_owner(canister_princ.clone(), &owner_wallet).await{
-        return CreateCanisterResponse::ChangeControllerError;
+        return CreateCanisterResponse::ChangeControllerError(_err_str);
     }
 
     return CreateCanisterResponse::Created(canister_princ);
