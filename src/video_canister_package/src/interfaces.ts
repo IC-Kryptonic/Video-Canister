@@ -36,16 +36,16 @@ export interface RawWalletResponse {
 }
 
 export interface StorageConfig {
-  spawnCanisterPrincipal?: string;
-  indexCanisterPrincipal?: string;
+  spawnCanisterPrincipalId?: string;
+  indexCanisterPrincipalId?: string;
   chunkSize?: number;
   uploadAttemptsPerChunk?: number;
   storeOnIndex?: boolean;
 }
 
 export interface InternalStorageConfig extends StorageConfig {
-  spawnCanisterPrincipal: string;
-  indexCanisterPrincipal: string;
+  spawnCanisterPrincipalId: string;
+  indexCanisterPrincipalId: string;
   chunkSize: number;
   uploadAttemptsPerChunk: number;
   storeOnIndex: boolean;

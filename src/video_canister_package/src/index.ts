@@ -21,11 +21,11 @@ import {
   UPLOAD_ATTEMPTS_PER_CHUNK,
 } from './constants';
 import { VideoToStore, Video, StorageConfig, InternalStorageConfig, UpdateMetadata, UpdateVideo } from './interfaces';
-import { checkUpdateMetadataParams, checkUpdateVideoParams } from './parameter-check';
+import { checkUpdateConfigParams, checkUpdateMetadataParams, checkUpdateVideoParams } from './parameter-check';
 
 const defaultConfig: InternalStorageConfig = {
-  spawnCanisterPrincipal: SPAWN_PRINCIPAL_ID,
-  indexCanisterPrincipal: INDEX_PRINCIPAL_ID,
+  spawnCanisterPrincipalId: SPAWN_PRINCIPAL_ID,
+  indexCanisterPrincipalId: INDEX_PRINCIPAL_ID,
   chunkSize: CHUNK_SIZE,
   storeOnIndex: true,
   uploadAttemptsPerChunk: UPLOAD_ATTEMPTS_PER_CHUNK,
@@ -39,11 +39,12 @@ export class ICVideoStorage {
   }
 
   updateConfig(config: StorageConfig) {
+    checkUpdateConfigParams(config);
     if (config.chunkSize) this.config.chunkSize = config.chunkSize;
     if (config.uploadAttemptsPerChunk) this.config.uploadAttemptsPerChunk = config.uploadAttemptsPerChunk;
     if (config.storeOnIndex !== undefined) this.config.storeOnIndex = config.storeOnIndex;
-    if (config.indexCanisterPrincipal) this.config.indexCanisterPrincipal = config.indexCanisterPrincipal;
-    if (config.spawnCanisterPrincipal) this.config.spawnCanisterPrincipal = config.spawnCanisterPrincipal;
+    if (config.indexCanisterPrincipalId) this.config.indexCanisterPrincipalId = config.indexCanisterPrincipalId;
+    if (config.spawnCanisterPrincipalId) this.config.spawnCanisterPrincipalId = config.spawnCanisterPrincipalId;
   }
 
   async uploadVideo(identity: Identity, walletId: Principal, video: VideoToStore, cycles: bigint): Promise<Principal> {
@@ -55,7 +56,7 @@ export class ICVideoStorage {
       identity,
       walletId,
       REQUIRED_CYCLES,
-      this.config.spawnCanisterPrincipal,
+      this.config.spawnCanisterPrincipalId,
     );
 
     await checkController(identity, walletId, videoPrincipal);
@@ -89,7 +90,7 @@ export class ICVideoStorage {
       const indexActor = await getCanisterActor(
         identity,
         CANISTER_TYPE.INDEX_CANISTER,
-        Principal.fromText(this.config.indexCanisterPrincipal),
+        Principal.fromText(this.config.indexCanisterPrincipalId),
       );
       await indexActor.post_video(videoPrincipal);
     }
@@ -148,7 +149,7 @@ export class ICVideoStorage {
     const indexActor = await getCanisterActor(
       identity,
       CANISTER_TYPE.INDEX_CANISTER,
-      Principal.fromText(this.config.indexCanisterPrincipal),
+      Principal.fromText(this.config.indexCanisterPrincipalId),
     );
     const optVideos = (await indexActor.get_my_videos()) as [[Principal]];
 

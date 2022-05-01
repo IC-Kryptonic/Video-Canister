@@ -1,7 +1,7 @@
 import { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { MAX_CHUNK_SIZE, MIN_CHUNK_SIZE } from './constants';
-import { UpdateMetadata, UpdateVideo } from './interfaces';
+import { StorageConfig, UpdateMetadata, UpdateVideo } from './interfaces';
 
 function parameterError(errorMessage: string, parameter: string) {
   const error = errorMessage + `\n Erroneous parameter: ${parameter}`;
@@ -33,12 +33,48 @@ function checkValidString(text: string): boolean {
   return typeof text === 'string' && text.length > 0;
 }
 
-function checkValidChunkNum(chunkNum: number): boolean {
-  return typeof chunkNum === 'number' && chunkNum >= MIN_CHUNK_SIZE && chunkNum <= MAX_CHUNK_SIZE;
+function checkValidBoolean(bool: boolean): boolean {
+  return typeof bool === 'boolean';
+}
+
+function checkValidNumber(num: number): boolean {
+  return typeof num === 'number' && num >= 0;
+}
+
+function checkValidChunkSize(chunkSize: number): boolean {
+  return typeof chunkSize === 'number' && chunkSize >= MIN_CHUNK_SIZE && chunkSize <= MAX_CHUNK_SIZE;
 }
 
 function checkValidBuffer(buffer: Buffer): boolean {
   return Buffer.isBuffer(buffer) && buffer.length > 0;
+}
+
+export function checkUpdateConfigParams(input: StorageConfig) {
+  const errorMessage =
+    `Invalid config object\n` +
+    `Valid object properties:\n{\n  ` +
+    `spawnCanisterPrincipalId: string\n  indexCanisterPrincipalId: string\n  ` +
+    `chunkSize: number\n  uploadAttemptsPerChunk: number\n  storeOnIndex: boolean\n}`;
+
+  if (input.spawnCanisterPrincipalId) {
+    try {
+      Principal.fromText(input.spawnCanisterPrincipalId);
+    } catch (error) {
+      parameterError(errorMessage, 'spawnCanisterPrincipalId');
+    }
+  }
+  if (input.indexCanisterPrincipalId) {
+    try {
+      Principal.fromText(input.indexCanisterPrincipalId);
+    } catch (error) {
+      parameterError(errorMessage, 'indexCanisterPrincipalId');
+    }
+  }
+  if (input.chunkSize && !checkValidChunkSize(input.chunkSize)) parameterError(errorMessage, 'chunkSize');
+  if (input.uploadAttemptsPerChunk && !checkValidNumber(input.uploadAttemptsPerChunk)) {
+    parameterError(errorMessage, 'uploadAttemptsPerChunk');
+  }
+  if (input.storeOnIndex && !checkValidBoolean(input.storeOnIndex)) parameterError(errorMessage, 'storeOnIndex');
 }
 
 export function checkUpdateMetadataParams(input: UpdateMetadata): UpdateMetadata {
@@ -51,7 +87,7 @@ export function checkUpdateMetadataParams(input: UpdateMetadata): UpdateMetadata
   if (!input.identity || !checkValidIdentity(input.identity)) parameterError(errorMessage, 'identity');
   if (!input.name || !checkValidString(input.name)) parameterError(errorMessage, 'name');
   if (!input.description || !checkValidString(input.description)) parameterError(errorMessage, 'description');
-  if (!input.chunkNum || !checkValidChunkNum(input.chunkNum)) parameterError(errorMessage, 'chunkNum');
+  if (!input.chunkNum || !checkValidNumber(input.chunkNum)) parameterError(errorMessage, 'chunkNum');
 
   return input;
 }
@@ -64,7 +100,7 @@ export function checkUpdateVideoParams(input: UpdateVideo): UpdateVideo {
 
   if (!input.principal || !checkValidPrincipal(input.principal)) parameterError(errorMessage, 'principal');
   if (!input.identity || !checkValidIdentity(input.identity)) parameterError(errorMessage, 'identity');
-  if (!input.chunkNum || !checkValidChunkNum(input.chunkNum)) parameterError(errorMessage, 'chunkNum');
+  if (!input.chunkNum || !checkValidNumber(input.chunkNum)) parameterError(errorMessage, 'chunkNum');
   if (!input.videoBuffer || !checkValidBuffer(input.videoBuffer)) parameterError(errorMessage, 'videoBuffer');
 
   return input;
