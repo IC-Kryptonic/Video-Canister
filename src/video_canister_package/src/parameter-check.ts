@@ -130,6 +130,11 @@ export function checkChangeOwnerParams(input: ChangeOwner): ChangeOwner {
   return input;
 }
 
+export function checkGetMyVideosParams(identity: Identity) {
+  const errorMessage = `Invalid parameters for method 'getMyVideos'\nExpected input: (identity: Identity)`;
+  if (!checkValidIdentity(identity)) parameterError(errorMessage, 'identity');
+}
+
 export function checkUpdateMetadataParams(input: UpdateMetadata): UpdateMetadata {
   const errorMessage =
     `Invalid parameters for method 'updateMetadata'\n` +
