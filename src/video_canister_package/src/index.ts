@@ -24,6 +24,7 @@ import {
 } from './interfaces';
 import {
   checkChangeOwnerParams,
+  checkGetVideoParams,
   checkUpdateConfigParams,
   checkUpdateMetadataParams,
   checkUpdateVideoParams,
@@ -99,6 +100,7 @@ export class ICVideoStorage {
   }
 
   async getVideo(identity: Identity, principal: Principal): Promise<Video> {
+    checkGetVideoParams(identity, principal);
     const actor = await getCanisterActor(identity, CANISTER_TYPE.VIDEO_CANISTER, principal);
 
     try {
