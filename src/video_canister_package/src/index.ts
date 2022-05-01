@@ -12,16 +12,22 @@ import {
   getCanisterActor,
   uploadChunk,
 } from './common';
-import { CANISTER_TYPE, CHUNK_SIZE, REQUIRED_CYCLES, INDEX_PRINCIPAL_ID, SPAWN_PRINCIPAL_ID } from './constants';
+import {
+  CANISTER_TYPE,
+  CHUNK_SIZE,
+  REQUIRED_CYCLES,
+  INDEX_PRINCIPAL_ID,
+  SPAWN_PRINCIPAL_ID,
+  UPLOAD_ATTEMPTS_PER_CHUNK,
+} from './constants';
 import { VideoToStore, Video, StorageConfig, InternalStorageConfig } from './interfaces';
-// forward the export of interfaces that are relevant for the package user
-// export { VideoToStore, Video, StorageConfig } from './interfaces';
 
 const defaultConfig: InternalStorageConfig = {
   spawnCanisterPrincipal: SPAWN_PRINCIPAL_ID,
   indexCanisterPrincipal: INDEX_PRINCIPAL_ID,
   chunkSize: CHUNK_SIZE,
   storeOnIndex: true,
+  uploadAttemptsPerChunk: UPLOAD_ATTEMPTS_PER_CHUNK,
 };
 
 export class ICVideoStorage {
@@ -33,6 +39,7 @@ export class ICVideoStorage {
 
   updateConfig(config: StorageConfig) {
     if (config.chunkSize) this.config.chunkSize = config.chunkSize;
+    if (config.uploadAttemptsPerChunk) this.config.uploadAttemptsPerChunk = config.uploadAttemptsPerChunk;
     if (config.storeOnIndex !== undefined) this.config.storeOnIndex = config.storeOnIndex;
     if (config.indexCanisterPrincipal) this.config.indexCanisterPrincipal = config.indexCanisterPrincipal;
     if (config.spawnCanisterPrincipal) this.config.spawnCanisterPrincipal = config.spawnCanisterPrincipal;
@@ -83,9 +90,14 @@ export class ICVideoStorage {
       const chunkArray = Array.from(chunkSlice);
 
       promises.push(
-        uploadChunk(() => videoActor.put_chunk(i, chunkArray), `Could not put chunk <${i}> into the video canister`),
+        uploadChunk(
+          () => videoActor.put_chunk(i, chunkArray),
+          this.config.uploadAttemptsPerChunk,
+          `Could not put chunk <${i}> into the video canister`,
+        ),
       );
     }
+
     await Promise.all(promises);
 
     if (this.config.storeOnIndex) {

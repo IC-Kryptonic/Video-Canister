@@ -38,6 +38,7 @@ export interface StorageConfig {
   spawnCanisterPrincipal?: string;
   indexCanisterPrincipal?: string;
   chunkSize?: number;
+  uploadAttemptsPerChunk?: number;
   storeOnIndex?: boolean;
 }
 
@@ -45,5 +46,6 @@ export interface InternalStorageConfig extends StorageConfig {
   spawnCanisterPrincipal: string;
   indexCanisterPrincipal: string;
   chunkSize: number;
+  uploadAttemptsPerChunk: number;
   storeOnIndex: boolean;
 }

@@ -18,6 +18,8 @@ export const REQUIRED_CYCLES: bigint = BigInt(200_000_000_000);
 
 export const CHUNK_SIZE = 100000;
 
+export const UPLOAD_ATTEMPTS_PER_CHUNK = 3;
+
 export const enum CANISTER_TYPE {
   'VIDEO_CANISTER' = 'VIDEO_CANISTER',
   'SPAWN_CANISTER' = 'SPAWN_CANISTER',

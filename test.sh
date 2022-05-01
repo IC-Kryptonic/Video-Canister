@@ -40,7 +40,7 @@ dfx canister call $video_principal put_chunk '(0 : nat64, blob "\CA\FF\EE")'
 #start package tests
 pushd src/video_canister_package
 npm install
-npm test
+npm test -- video_canister.test.ts
 popd
 
 #clean up

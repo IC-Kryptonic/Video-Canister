@@ -60,12 +60,11 @@ export const executeVideoCanisterPut = async (func: Function, errorMessage: stri
   }
 };
 
-export const uploadChunk = async (func: Function, errorMessage: string) => {
-  const uploadTriesPerChunk = 3;
+export const uploadChunk = async (func: Function, uploadAttempts: number, errorMessage: string) => {
   let uploadSuccessful = false;
   let lastError: string = '';
 
-  for (let i = 0; i < uploadTriesPerChunk; i++) {
+  for (let i = 0; i < uploadAttempts; i++) {
     try {
       const response = (await func()) as ChangeOwnerResponse | PutChunkResponse | PutMetaInfoResponse;
       if (!('success' in response)) {
