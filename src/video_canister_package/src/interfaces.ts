@@ -1,3 +1,4 @@
+import { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 
 export interface Video {
@@ -48,4 +49,19 @@ export interface InternalStorageConfig extends StorageConfig {
   chunkSize: number;
   uploadAttemptsPerChunk: number;
   storeOnIndex: boolean;
+}
+
+export interface UpdateVideo {
+  identity: Identity;
+  principal: Principal;
+  chunkNum: number;
+  videoBuffer: Buffer;
+}
+
+export interface UpdateMetadata {
+  identity: Identity;
+  principal: Principal;
+  name: string;
+  description: string;
+  chunkNum: number;
 }

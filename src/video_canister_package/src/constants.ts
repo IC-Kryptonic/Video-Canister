@@ -12,11 +12,18 @@ export const DEV_MODE = process.env.NODE_ENV === 'DEV';
 export const SPAWN_PRINCIPAL_ID = DEV_MODE ? process.env.SPAWN_PRINCIPAL_ID || '' : 'ryjl3-tyaaa-aaaaa-aaaba-cai';
 export const INDEX_PRINCIPAL_ID = DEV_MODE ? process.env.INDEX_PRINCIPAL_ID || '' : 'rkp4c-7iaaa-aaaaa-aaaca-cai';
 
+export const LOCALHOST = 'http://localhost:8000';
+
+export const IC0HOST = 'https://ic0.app';
+
 export const MANAGEMENT_PRINCIPAL_ID = 'aaaaa-aa';
 
 export const REQUIRED_CYCLES: bigint = BigInt(200_000_000_000);
 
 export const CHUNK_SIZE = 100000;
+// TODO confirm
+export const MIN_CHUNK_SIZE = 1;
+export const MAX_CHUNK_SIZE = 15000000;
 
 export const UPLOAD_ATTEMPTS_PER_CHUNK = 3;
 
