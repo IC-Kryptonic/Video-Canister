@@ -12,27 +12,17 @@ import {
   getCanisterActor,
   uploadChunk,
 } from './common';
+import { CANISTER_TYPE, REQUIRED_CYCLES, DEFAULT_CONFIG } from './constants';
+import { Video, StorageConfig, InternalStorageConfig, UpdateMetadata, UpdateVideo, UploadVideo } from './interfaces';
 import {
-  CANISTER_TYPE,
-  CHUNK_SIZE,
-  REQUIRED_CYCLES,
-  INDEX_PRINCIPAL_ID,
-  SPAWN_PRINCIPAL_ID,
-  UPLOAD_ATTEMPTS_PER_CHUNK,
-} from './constants';
-import { VideoToStore, Video, StorageConfig, InternalStorageConfig, UpdateMetadata, UpdateVideo } from './interfaces';
-import { checkUpdateConfigParams, checkUpdateMetadataParams, checkUpdateVideoParams } from './parameter-check';
-
-const defaultConfig: InternalStorageConfig = {
-  spawnCanisterPrincipalId: SPAWN_PRINCIPAL_ID,
-  indexCanisterPrincipalId: INDEX_PRINCIPAL_ID,
-  chunkSize: CHUNK_SIZE,
-  storeOnIndex: true,
-  uploadAttemptsPerChunk: UPLOAD_ATTEMPTS_PER_CHUNK,
-};
+  checkUpdateConfigParams,
+  checkUpdateMetadataParams,
+  checkUpdateVideoParams,
+  checkUploadVideoParams,
+} from './parameter-check';
 
 export class ICVideoStorage {
-  config: InternalStorageConfig = JSON.parse(JSON.stringify(defaultConfig));
+  config: InternalStorageConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
 
   constructor(config?: StorageConfig) {
     if (config) this.updateConfig(config);
@@ -47,7 +37,8 @@ export class ICVideoStorage {
     if (config.spawnCanisterPrincipalId) this.config.spawnCanisterPrincipalId = config.spawnCanisterPrincipalId;
   }
 
-  async uploadVideo(identity: Identity, walletId: Principal, video: VideoToStore, cycles: bigint): Promise<Principal> {
+  async uploadVideo(input: UploadVideo): Promise<Principal> {
+    const { identity, walletId, video, cycles } = checkUploadVideoParams(input);
     if (cycles < REQUIRED_CYCLES) {
       throw Error('Not enough cycles, need at least ' + REQUIRED_CYCLES + ' for video canister creation');
     }

@@ -1,7 +1,7 @@
 import { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { MAX_CHUNK_SIZE, MIN_CHUNK_SIZE } from './constants';
-import { StorageConfig, UpdateMetadata, UpdateVideo } from './interfaces';
+import { StorageConfig, UpdateMetadata, UpdateVideo, UploadVideo, VideoToStore } from './interfaces';
 
 function parameterError(errorMessage: string, parameter: string) {
   const error = errorMessage + `\n Erroneous parameter: ${parameter}`;
@@ -49,6 +49,18 @@ function checkValidBuffer(buffer: Buffer): boolean {
   return Buffer.isBuffer(buffer) && buffer.length > 0;
 }
 
+function checkValidBigint(num: bigint) {
+  return typeof num === 'bigint' && num >= 0;
+}
+
+function checkValidVideoToStore(video: VideoToStore): boolean {
+  if (!video.name || !checkValidString(video.name)) return false;
+  if (!video.description || !checkValidString(video.description)) return false;
+  if (!video.videoBuffer || !checkValidBuffer(video.videoBuffer)) return false;
+
+  return true;
+}
+
 export function checkUpdateConfigParams(input: StorageConfig) {
   const errorMessage =
     `Invalid config object\n` +
@@ -74,7 +86,22 @@ export function checkUpdateConfigParams(input: StorageConfig) {
   if (input.uploadAttemptsPerChunk && !checkValidNumber(input.uploadAttemptsPerChunk)) {
     parameterError(errorMessage, 'uploadAttemptsPerChunk');
   }
-  if (input.storeOnIndex && !checkValidBoolean(input.storeOnIndex)) parameterError(errorMessage, 'storeOnIndex');
+  if (input.storeOnIndex !== undefined && !checkValidBoolean(input.storeOnIndex))
+    parameterError(errorMessage, 'storeOnIndex');
+}
+
+export function checkUploadVideoParams(input: UploadVideo): UploadVideo {
+  const errorMessage =
+    `Invalid parameters for method 'uploadVideo'\n` +
+    `Expected input:\n{\n  ` +
+    `walletId: Principal\n  identity: Identity\n  video: VideoToStore\n  cycles: bigint\n}`;
+
+  if (!input.walletId || !checkValidPrincipal(input.walletId)) parameterError(errorMessage, 'principal');
+  if (!input.identity || !checkValidIdentity(input.identity)) parameterError(errorMessage, 'identity');
+  if (!input.video || !checkValidVideoToStore(input.video)) parameterError(errorMessage, 'video');
+  if (!input.cycles || !checkValidBigint(input.cycles)) parameterError(errorMessage, 'cycles');
+
+  return input;
 }
 
 export function checkUpdateMetadataParams(input: UpdateMetadata): UpdateMetadata {

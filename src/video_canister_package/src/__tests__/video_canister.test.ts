@@ -36,9 +36,13 @@ test('createVideo', async () => {
   const anon = new AnonymousIdentity();
   const anonWallet = Principal.fromText(anonWalletPrincipal);
 
-  const creationCycles: bigint = BigInt(200_000_000_000);
-
-  const principal: Principal = await storage.uploadVideo(anon, anonWallet, video, creationCycles);
+  const cycles: bigint = BigInt(200_000_000_000);
+  const principal: Principal = await storage.uploadVideo({
+    identity: anon,
+    walletId: anonWallet,
+    video,
+    cycles,
+  });
 
   const uploadedVideo = await storage.getVideo(anon, principal);
 
@@ -60,9 +64,14 @@ test('changeOwner', async () => {
   const anon = new AnonymousIdentity();
   const anonWallet = Principal.fromText(anonWalletPrincipal);
 
-  const creationCycles: bigint = BigInt(300_000_000_000);
+  const cycles: bigint = BigInt(300_000_000_000);
 
-  const videoPrincipal: Principal = await storage.uploadVideo(anon, anonWallet, video, creationCycles);
+  const videoPrincipal: Principal = await storage.uploadVideo({
+    identity: anon,
+    walletId: anonWallet,
+    video,
+    cycles,
+  });
 
   const newOwnerIdentity = Secp256k1KeyIdentity.generate();
   const newOwner = newOwnerIdentity.getPrincipal();
@@ -90,9 +99,14 @@ test('indexVideo', async () => {
   const anon = new AnonymousIdentity();
   const anonWallet = Principal.fromText(anonWalletPrincipal);
 
-  const creationCycles: bigint = BigInt(200_000_000_000);
+  const cycles: bigint = BigInt(200_000_000_000);
 
-  const videoPrincipal: Principal = await storage.uploadVideo(anon, anonWallet, video, creationCycles);
+  const videoPrincipal: Principal = await storage.uploadVideo({
+    identity: anon,
+    walletId: anonWallet,
+    video,
+    cycles,
+  });
 
   const myVideos: Principal[] = await storage.getMyVideos(anon);
 

@@ -5,6 +5,7 @@ import { idlFactory as spawnCanisterIdl } from './canisters/spawn_canister/spawn
 import { idlFactory as managementCanisterIdl } from './canisters/management_canister/managementCanister_idl.did';
 import { idlFactory as walletCanisterIdl } from './canisters/wallet_canister/walletCanister_idl.did';
 import { idlFactory as indexCanisterIdl } from './canisters/index_canister/indexCanister_idl.did';
+import { InternalStorageConfig } from './interfaces';
 
 export const DEV_MODE = process.env.NODE_ENV === 'DEV';
 
@@ -26,6 +27,14 @@ export const MIN_CHUNK_SIZE = 1;
 export const MAX_CHUNK_SIZE = 15000000;
 
 export const UPLOAD_ATTEMPTS_PER_CHUNK = 3;
+
+export const DEFAULT_CONFIG: InternalStorageConfig = {
+  spawnCanisterPrincipalId: SPAWN_PRINCIPAL_ID,
+  indexCanisterPrincipalId: INDEX_PRINCIPAL_ID,
+  chunkSize: CHUNK_SIZE,
+  storeOnIndex: true,
+  uploadAttemptsPerChunk: UPLOAD_ATTEMPTS_PER_CHUNK,
+};
 
 export const enum CANISTER_TYPE {
   'VIDEO_CANISTER' = 'VIDEO_CANISTER',

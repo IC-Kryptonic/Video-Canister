@@ -51,6 +51,13 @@ export interface InternalStorageConfig extends StorageConfig {
   storeOnIndex: boolean;
 }
 
+export interface UploadVideo {
+  identity: Identity;
+  walletId: Principal;
+  video: VideoToStore;
+  cycles: bigint;
+}
+
 export interface UpdateVideo {
   identity: Identity;
   principal: Principal;
