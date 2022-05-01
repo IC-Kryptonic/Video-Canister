@@ -77,7 +77,13 @@ test('changeOwner', async () => {
   const newOwner = newOwnerIdentity.getPrincipal();
   const newOwnerWallet = Secp256k1KeyIdentity.generate().getPrincipal(); //Just for testing, of course the newOwner doesn't have access to the Wallet and behind the principal is no actual wallet but that doesn't matter for the test
 
-  await storage.changeOwner(anon, anonWallet, videoPrincipal, newOwner, newOwnerWallet);
+  await storage.changeOwner({
+    oldIdentity: anon,
+    oldWallet: anonWallet,
+    videoPrincipal,
+    newOwner,
+    newOwnerWallet,
+  });
 
   const uploadedVideo = await storage.getVideo(anon, videoPrincipal);
 

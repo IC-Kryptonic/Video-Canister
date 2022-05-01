@@ -1,7 +1,7 @@
 import { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { MAX_CHUNK_SIZE, MIN_CHUNK_SIZE } from './constants';
-import { StorageConfig, UpdateMetadata, UpdateVideo, UploadVideo, VideoToStore } from './interfaces';
+import { ChangeOwner, StorageConfig, UpdateMetadata, UpdateVideo, UploadVideo, VideoToStore } from './interfaces';
 
 function parameterError(errorMessage: string, parameter: string) {
   const error = errorMessage + `\n Erroneous parameter: ${parameter}`;
@@ -96,10 +96,29 @@ export function checkUploadVideoParams(input: UploadVideo): UploadVideo {
     `Expected input:\n{\n  ` +
     `walletId: Principal\n  identity: Identity\n  video: VideoToStore\n  cycles: bigint\n}`;
 
-  if (!input.walletId || !checkValidPrincipal(input.walletId)) parameterError(errorMessage, 'principal');
+  if (!input.walletId || !checkValidPrincipal(input.walletId)) parameterError(errorMessage, 'walletId');
   if (!input.identity || !checkValidIdentity(input.identity)) parameterError(errorMessage, 'identity');
   if (!input.video || !checkValidVideoToStore(input.video)) parameterError(errorMessage, 'video');
   if (!input.cycles || !checkValidBigint(input.cycles)) parameterError(errorMessage, 'cycles');
+
+  return input;
+}
+
+export function checkChangeOwnerParams(input: ChangeOwner): ChangeOwner {
+  const errorMessage =
+    `Invalid parameters for method 'changeOwner'\n` +
+    `Expected input:\n{\n  ` +
+    `oldIdentity: Identity\n  oldWallet: Principal\n  videoPrincipal: Principal\n  newOwner: Principal\n  newOwnerWallet: Principal\n}}`;
+
+  if (!input.oldIdentity || !checkValidIdentity(input.oldIdentity)) parameterError(errorMessage, 'oldIdentity');
+  if (!input.oldWallet || !checkValidPrincipal(input.oldWallet)) parameterError(errorMessage, 'oldWallet');
+  if (!input.videoPrincipal || !checkValidPrincipal(input.videoPrincipal)) {
+    parameterError(errorMessage, 'videoPrincipal');
+  }
+  if (!input.newOwner || !checkValidPrincipal(input.newOwner)) parameterError(errorMessage, 'newOwner');
+  if (!input.newOwnerWallet || !checkValidPrincipal(input.newOwnerWallet)) {
+    parameterError(errorMessage, 'newOwnerWallet');
+  }
 
   return input;
 }

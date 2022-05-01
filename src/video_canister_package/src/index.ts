@@ -13,8 +13,17 @@ import {
   uploadChunk,
 } from './common';
 import { CANISTER_TYPE, REQUIRED_CYCLES, DEFAULT_CONFIG } from './constants';
-import { Video, StorageConfig, InternalStorageConfig, UpdateMetadata, UpdateVideo, UploadVideo } from './interfaces';
 import {
+  Video,
+  StorageConfig,
+  InternalStorageConfig,
+  UpdateMetadata,
+  UpdateVideo,
+  UploadVideo,
+  ChangeOwner,
+} from './interfaces';
+import {
+  checkChangeOwnerParams,
   checkUpdateConfigParams,
   checkUpdateMetadataParams,
   checkUpdateVideoParams,
@@ -124,15 +133,9 @@ export class ICVideoStorage {
     }
   }
 
-  async changeOwner(
-    oldIdentity: Identity,
-    oldWallet: Principal,
-    videoPrincipal: Principal,
-    newOwner: Principal,
-    newOwnerWallet: Principal,
-  ) {
+  async changeOwner(input: ChangeOwner) {
+    const { oldIdentity, oldWallet, videoPrincipal, newOwner, newOwnerWallet } = checkChangeOwnerParams(input);
     await changeCanisterController(oldIdentity, oldWallet, videoPrincipal, newOwnerWallet);
-
     await changeVideoOwner(oldIdentity, videoPrincipal, newOwner);
   }
 

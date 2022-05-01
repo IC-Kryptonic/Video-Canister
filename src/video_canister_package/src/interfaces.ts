@@ -58,6 +58,14 @@ export interface UploadVideo {
   cycles: bigint;
 }
 
+export interface ChangeOwner {
+  oldIdentity: Identity;
+  oldWallet: Principal;
+  videoPrincipal: Principal;
+  newOwner: Principal;
+  newOwnerWallet: Principal;
+}
+
 export interface UpdateVideo {
   identity: Identity;
   principal: Principal;
