@@ -68,22 +68,22 @@ export function checkUpdateConfigParams(input: StorageConfig) {
     `spawnCanisterPrincipalId: string\n  indexCanisterPrincipalId: string\n  ` +
     `chunkSize: number\n  uploadAttemptsPerChunk: number\n  storeOnIndex: boolean\n}`;
 
-  if (input.spawnCanisterPrincipalId) {
+  if (input.spawnCanisterPrincipalId !== undefined) {
     try {
       Principal.fromText(input.spawnCanisterPrincipalId);
     } catch (error) {
       parameterError(errorMessage, 'spawnCanisterPrincipalId');
     }
   }
-  if (input.indexCanisterPrincipalId) {
+  if (input.indexCanisterPrincipalId !== undefined) {
     try {
       Principal.fromText(input.indexCanisterPrincipalId);
     } catch (error) {
       parameterError(errorMessage, 'indexCanisterPrincipalId');
     }
   }
-  if (input.chunkSize && !checkValidChunkSize(input.chunkSize)) parameterError(errorMessage, 'chunkSize');
-  if (input.uploadAttemptsPerChunk && !checkValidNumber(input.uploadAttemptsPerChunk)) {
+  if (input.chunkSize !== undefined && !checkValidChunkSize(input.chunkSize)) parameterError(errorMessage, 'chunkSize');
+  if (input.uploadAttemptsPerChunk !== undefined && !checkValidNumber(input.uploadAttemptsPerChunk)) {
     parameterError(errorMessage, 'uploadAttemptsPerChunk');
   }
   if (input.storeOnIndex !== undefined && !checkValidBoolean(input.storeOnIndex))
