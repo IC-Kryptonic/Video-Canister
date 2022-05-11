@@ -2,26 +2,47 @@
 
 This package is a WIP and not intended for public use as of now.
 
-We do not warrant proper functionality of the package and do not bear the reponsibility of any (financial) damage caused by using it.
+Storing data on a Blockchain causes costs that cannot be refunded. Please us this package with care.
 
-# Using the NPM Package
+We do not warrant flawless functionality of this package and do not bear the reponsibility of any (financial) damage caused by using it.
 
-## Feature Overview
+# ic-video-storage
 
-This package allows you to:
+JavaScript and TypeScript library to easily store and stream videos using the [Internet Computer](https://dfinity.org/).
 
-- Upload videos in the .mp4 format to the Internet Computer Blockchain
-- Download videos stored on the Internet Computer Blockchain
-- Retreive the location of stored videos for a specific user from an index canister
-- Change the owner of a video
+[Installation](#installation)
 
-## Getting Started
+[Usage](#usage)
 
-### Install the Package
+- [Initializing](#initialization) the storage object and updating the config
+- [Uploading](#uploading-a-video-to-a-new-canister) a video to a new canister
+- [Overriding](#overriding-the-metadata-in-a-video-canister) the video metadata in a canister
+- [Overriding](#overriding-the-video-in-a-canister) the video in a canister
+- [Streaming](#streaming-a-video-from-a-canister) a video from a canister
+- [Retrieving](#querying-the-uploaded-videos-remembered-in-the-index-canister-for-a-specific-user) the created video canisters for a user
+- [Changing](#transferring-the-ownership-of-a-video-canister) the owner of a video canister
+
+[Motivation and Design Principles](https://github.com/IC-Kryptonic/Video-Canister#Design-Goals)
+
+#
+
+# Installation
+
+Install the Package:
 
 `npm install ic-video-storage`
 
-### Initialize a Storage Object in Your Application
+#
+
+# Usage
+
+## Initialization
+
+Initialize a storage object in your application:
+
+`new ICVideoStorageObject(storageConfig: StorageConfig)`
+
+Example:
 
 ```
 import { ICVideoStorage } from 'ic-video-storage';
@@ -34,27 +55,57 @@ const storageConfig = {
 const storage = new ICVideoStorage(storageConfig);
 ```
 
-### Adjust the Storage Config
+If you need to chang the config for an existing storage object you can overwrite the properties with the `updateConfig` function:
 
-The storage config comprises the following parameters. If you do not intend to change any default parameters, you don't need to provide a config object when initializing the storage object.
+`updateConfig(config: StorageConfig)`
 
-| Parameter name         | Parameter Type | Default Value               | Purpose                                                                                 |
-| ---------------------- | -------------- | --------------------------- | --------------------------------------------------------------------------------------- |
-| spawnCanisterPrincipal | String         | ryjl3-tyaaa-aaaaa-aaaba-cai | On-chain location of the spawn canister used to create video canisters                  |
-| indexCanisterPrincipal | String         | rkp4c-7iaaa-aaaaa-aaaca-cai | On-chain location of the index canister used to remember the location of created videos |
-| storeOnIndex           | boolean        | true                        | Determines if location of created video canister is remembered in index canister        |
-| chunkSize              | number         | 1024                        | Size of the chunks that an uploaded video is split into in bytes (< 2MB)                |
-|                        |                |                             |
+#### Storage Config Properties
 
-**! Important:** Both default values for the spawn and the index canister are valid canister adresses of decentralized smart contracts that were deployed to be used with this package. Only overwrite these values if you want to deploy independent spawn / index canisters that are controlled by you.
+The storage config comprises the parameters defined in the table below. If you do not intend to change any default parameters, you don't need to provide a config object when initializing the storage object.
 
-### Uploading a Video
+| Parameter name           | Parameter Type | Default Value                 | Purpose                                                                                 |
+| ------------------------ | -------------- | ----------------------------- | --------------------------------------------------------------------------------------- |
+| spawnCanisterPrincipalId | String         | fvyzl-oaaaa-aaaal-qaxvq-cai\* | On-chain location of the spawn canister used to create video canisters                  |
+| indexCanisterPrincipalId | String         | fa7ig-piaaa-aaaal-qaxwa-cai\* | On-chain location of the index canister used to remember the location of created videos |
+| storeOnIndex             | boolean        | true                          | Determines if location of created video canister is remembered in index canister        |
+| chunkSize                | number         | 1024                          | Size of the chunks that an uploaded video is split into in bytes (< 2MB)                |
+| uploadAttemptsPerChunk   | number         | 3                             | Maximum number of upload attempts per chunk before the upload throws an error.          |
+
+###
+
+**\*Important:** Both default values for the spawn and the index canister are valid canister adresses of decentralized smart contracts that were deployed to be used with this package.
+Only overwrite these values if you want to deploy independent spawn / index canisters that are controlled by you. The source code of both canisters can be found [here](https://github.com/IC-Kryptonic/Video-Canister).
+
+#
+
+## Uploading a video to a new canister
+
+The `uploadVideo` function of the storage object uses the spawn canister to create a new video canister, sets the metadata and stores the provided video in the created canister. It returns the principal of the created canister:
+
+`async uploadVideo(input: UploadVideo): Promise<Principal>`
+
+Properties of type `UploadVideo` (Object)
+
+- identity: Identity
+- walletId: Principal
+- video: VideoToStore (Object)
+  - name: string
+  - description: string
+  - file: Buffer
+- cycles: bigint
+
+**Attention**: The defined cycles are withdrawn from the specified wallet to create the new canister. The minimum cycles required amount to 200_000_000_000. All further cycles are sent to created video canister.
+
+Example:
 
 ```
-import { VideoToStore } from 'ic-video-storage';
+import { ICVideoStorage, VideoToStore } from 'ic-video-storage';
 
 //...
 
+const storage = new ICVideoStorage();
+
+// exemplary way of reading the file (in this case from disk)
 const file: Buffer  =  await  fs.promises.readFile(path);
 
 const  video: VideoToStore = {
@@ -71,56 +122,94 @@ const  cycles: bigint = BigInt(200_000_000_000);
 
 
 // the returned principal is the location of the created video canister contract
-const  principal: Principal = await storage.uploadVideo(
-  anon,                  // type: Identity
-  anonWallet,            // type: Principal
-  video,                 // type: VideoToStore
-  cycles				 // type: BigInt
-);
+const  principal: Principal = await storage.uploadVideo({
+    identity: anon,
+    walletId: anonWallet,
+    video: video,
+    cycles: cycles
+});
 ```
 
-### Streaming a Video with Known Location
+#
+
+## Overriding the Metadata in a Video Canister
+
+The `updateMetadata` function enables the owner of a video canister to update/override the metadata.
+
+`async updateMetadata(input: UpdateMetadata)`
+
+Properties of type `UpdateMetadata` (input object):
+
+- identity: Identity (identity used to make the call, must be the current owner of the canister)
+- principal: Principal (principal of the video canister)
+- name: string (new video name)
+- description: string (new video description)
+- chunkNum: number (new number of chunks)
+
+#
+
+## Overriding the Video in a Canister
+
+The `updateVideo` function enables the owner of a video canister to update/override the video stored in the canister.
+
+` async updateVideo(input: UpdateVideo)`
+
+Properties of type `UpdateVideo` (input object):
+
+- identity: Identity (identity used to make the call, must be the current owner of the canister)
+- principal: Principal (principal of the video canister)
+- chunkNum: number (number of chunks that the Buffer is split into)
+- videoBuffer: Buffer (new video)
+
+#
+
+## Streaming a Video from a Canister
+
+The `getVideo` function retrieves a stored video at a known location (provided through the `principal` parameter). The `identity` parameter is the identity of the caller.
+
+`async getVideo(identity: Identity, principal: Principal): Promise<Video>`
+
+Properties of type `Video` (returned object):
+
+- name: string
+- description: string
+- version: bigint
+- owner: Principal
+- videoBuffer: Buffer
+
+Example:
 
 ```
-// REPLACE: storage location of the video
+const storage = new ICVideoStorage();
 const principal: Principal = Principal.fromText('renrk-eyaaa-aaaaa-aaada-cai')
-
-// REPLACE: identity that was used to store the video
 const identity: Identity = new AnonymousIdentity();
-
 
 const video: Video = await storage.getVideo(
   identity,
   principal
 );
-
-/*
-* type Video:
-*	name: string
-*	description: string
-*	version: bigint
-*	owner: Principal
-*	videoBuffer: Buffer
-*/
 ```
 
-### Querying the Uploaded Videos Remembered in the Index Canister for a Specific User
+#
 
-```
-// REPLACE: identity of the user
-const identity: Identity = new AnonymousIdentity();
+## Querying the Uploaded Videos Remembered in the Index Canister for a Specific User
 
-const  myVideos: Principal[] = await  storage.getMyVideos(identity);
-```
+The `getMyVideos` function queries the index canister (either the default one or the one provided in the config) to retrieve the principals of all video canisters that were created for a given `identity` (i.e. user) and remembered by the index canister.
 
-### Transferring the Ownership of a Video (Canister)
+`async getMyVideos(identity: Identity): Promise<Principal[]>`
 
-```
-await  storage.changeOwner(
-  prevOwner,				// type: Identity
-  prewOwnerWallet,			// type: Principal
-  storedVideo, 				// type: Principal
-  newOwner, 				// type: Identity
-  newOwnerWallet			// type: Principal
- );
-```
+#
+
+## Transferring the Ownership of a Video Canister
+
+The `changeOwner` method changes the owner of a video canister (for example useful in a NFT scenario).
+
+`async changeOwner(input: ChangeOwner)`
+
+Properties of type `ChangeOwner` (input object):
+
+- oldIdentity: Identity
+- oldWallet: Principal
+- videoPrincipal: Principal
+- newOwner: Principal
+- newOwnerWallet: Principal
