@@ -1,14 +1,8 @@
-# !!Disclaimer: This project & read-me is a WIP!!
+# DISCLAIMER
 
-# General Project Information
+This package is a WIP and not intended for public use as of now.
 
-The mission of the Kryptonic project is to provide an easy solution for storing and streaming videos on the Internet Computer Blockchain. The project was developed in collaboration with the DFINITY team and supported with a 5k Grant.
-
-# Structure of this Readme
-
-[Documentation of the NPM package](#using-the-npm-package)
-
-[Documentation of the overall project](#decentralized-video-storage-and-streaming-on-the-internet-computer)
+We do not warrant proper functionality of the package and do not bear the reponsibility of any (financial) damage caused by using it.
 
 # Using the NPM Package
 
@@ -130,71 +124,3 @@ await  storage.changeOwner(
   newOwnerWallet			// type: Principal
  );
 ```
-
-# Decentralized Video Storage and Streaming on the Internet Computer
-
-## Design Goals
-
-Our motivation to build this API was the possibility to finally store assets directly on a Blockchain without media breaks on the DFINITY Internet Computer. However, figuring out how to store the asset in the best way on every new project is cumbersome. We wanted to give developers that work on applications with videos the opportunity to kickstart their project by benefitting on our work either by directly integrating our NPM package or using snippets from our source code. Further, we wanted to create a solution that works well with NFTs because many applications are currently build in the field of non-fungible tokens.
-
-## Architecture
-
-Our solution consists of four components:
-
-- Video Canister: For each uploaded video, one Video Canister is created that stores the meta information and the video data itself
-
-- Spawn Canister: This is the primary canister that the NPM package talks to in order to encapsulate the creation and installation of video canisters on the Internet Computer
-
-- Index Canister: You can use this canister optionally with the NPM package in order to store which creator uploaded which video. For example, a canister like this would be useful if you built an application where you want to query all videos that a specific creator uploaded
-
-- NPM package: The NPM package is available here (TODO). It allows you to easily integrate our streaming and storage API in your DAPP. Further information on the functions that the package exports are listed below
-
-## User Actions
-
-We define the following four main user actions for our API:
-
-1. Uploading a video:
-
-![](https://github.com/IC-Kryptonic/Video-Canister/blob/master/docs/diagrams/src/upload_video.png?raw=true)
-
-#
-
-2. Streaming / Getting a video:
-
-![](https://github.com/IC-Kryptonic/Video-Canister/blob/master/docs/diagrams/src/get_video.png?raw=true)
-
-#
-
-3. Getting the principals (the smart contract identifier) for all uploaded videos from a specific creator:
-
-![](https://github.com/IC-Kryptonic/Video-Canister/blob/master/docs/diagrams/src/get_my_videos.png?raw=true)
-
-#
-
-4. Changing the owner of a video. Technically, this means that the owner of the Smart Contract that a video is stored in is changed. This is useful if you use the video storage for NFTs, because if you transfer a token representing a video, the new token owner should also control the stored video:
-
-![](https://github.com/IC-Kryptonic/Video-Canister/blob/master/docs/diagrams/src/change_owner.png?raw=true)
-
-## Getting started
-
-## Local development
-
-### Prerequisites:
-
-Follow [this](https://smartcontracts.org/docs/rust-guide/rust-quickstart.html) DFINITY tutorial to set up a local Internet Computer Replica.
-
-### Installing the dependencies:
-
-Run `npm install` in the following directories:
-
-- `Video-Canister/`
-
-- `Video-Canister/src/video_canister_package/`
-
-### Deploying the Spawn Canister on the local replica
-
-Run `./deploy.sh` in the root directory.
-
-### Running the test suite
-
-Run `./test.sh` in the root directory.

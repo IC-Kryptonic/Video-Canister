@@ -1,31 +1,33 @@
 {
-  "name": "video_canister_package",
-  "version": "0.1.0",
-  "description": "Video Canister Package",
-  "main": "index.js",
+  "name": "ic-video-storage",
+  "version": "0.1.8",
+  "description": "IC Video Storage",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
   "files": [
-    "lib/**/*"
+    "build/**/*"
   ],
   "scripts": {
     "start": "ts-node src/index",
     "build": "tsc",
-    "test": "jest --config jestconfig.json"
+    "test": "NODE_ENV=DEV SPAWN_PRINCIPAL_ID='ryjl3-tyaaa-aaaaa-aaaba-cai' INDEX_PRINCIPAL_ID='rkp4c-7iaaa-aaaaa-aaaca-cai' jest --config jestconfig.json"
   },
-  "author": "",
+  "author": "moritz, alwin",
   "license": "MIT",
   "dependencies": {
     "@dfinity/agent": "0.10.3",
     "@dfinity/identity": "0.10.3",
+    "dotenv": "^16.0.0",
     "node-fetch": "2.6.7"
   },
   "devDependencies": {
     "@types/jest": "27.4.1",
     "@types/node": "16.11.26",
     "@types/node-fetch": "2.6.1",
+    "buffer": "6.0.3",
     "jest": "27.5.1",
     "ts-jest": "27.1.3",
     "ts-node": "10.5.0",
-    "typescript": "4.5.5",
-    "buffer": "6.0.3"
+    "typescript": "4.5.5"
   }
 }
