@@ -83,7 +83,10 @@ export function checkUpdateConfigParams(input: StorageConfig) {
     }
   }
   if (input.chunkSize !== undefined && !checkValidChunkSize(input.chunkSize)) parameterError(errorMessage, 'chunkSize');
-  if (input.uploadAttemptsPerChunk !== undefined && !checkValidNumber(input.uploadAttemptsPerChunk)) {
+  if (
+    input.uploadAttemptsPerChunk !== undefined &&
+    (!checkValidNumber(input.uploadAttemptsPerChunk) || input.uploadAttemptsPerChunk < 1)
+  ) {
     parameterError(errorMessage, 'uploadAttemptsPerChunk');
   }
   if (input.storeOnIndex !== undefined && !checkValidBoolean(input.storeOnIndex))

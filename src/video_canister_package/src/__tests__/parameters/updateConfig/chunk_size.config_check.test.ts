@@ -1,6 +1,6 @@
 // Tests that the public storage function correctly review that the parameters are provided with the right type
-import { MAX_CHUNK_SIZE, MIN_CHUNK_SIZE } from '../../constants';
-import { ICVideoStorage } from '../../index';
+import { MAX_CHUNK_SIZE, MIN_CHUNK_SIZE } from '../../../constants';
+import { ICVideoStorage } from '../../../index';
 
 jest.setTimeout(30_000);
 

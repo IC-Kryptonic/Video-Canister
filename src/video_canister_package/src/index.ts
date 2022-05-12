@@ -41,8 +41,8 @@ export class ICVideoStorage {
 
   updateConfig(config: StorageConfig) {
     checkUpdateConfigParams(config);
-    if (config.chunkSize) this.config.chunkSize = config.chunkSize;
-    if (config.uploadAttemptsPerChunk) this.config.uploadAttemptsPerChunk = config.uploadAttemptsPerChunk;
+    if (config.chunkSize !== undefined) this.config.chunkSize = config.chunkSize;
+    if (config.uploadAttemptsPerChunk !== undefined) this.config.uploadAttemptsPerChunk = config.uploadAttemptsPerChunk;
     if (config.storeOnIndex !== undefined) this.config.storeOnIndex = config.storeOnIndex;
     if (config.indexCanisterPrincipalId) this.config.indexCanisterPrincipalId = config.indexCanisterPrincipalId;
     if (config.spawnCanisterPrincipalId) this.config.spawnCanisterPrincipalId = config.spawnCanisterPrincipalId;

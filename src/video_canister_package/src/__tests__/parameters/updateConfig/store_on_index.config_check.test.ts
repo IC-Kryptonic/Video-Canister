@@ -1,5 +1,5 @@
 // Tests that the public storage function correctly review that the parameters are provided with the right type
-import { ICVideoStorage } from '../../index';
+import { ICVideoStorage } from '../../../index';
 
 jest.setTimeout(30_000);
 
