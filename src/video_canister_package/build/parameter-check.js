@@ -78,8 +78,7 @@ function checkUpdateConfigParams(input) {
     }
     if (input.chunkSize !== undefined && !checkValidChunkSize(input.chunkSize))
         parameterError(errorMessage, 'chunkSize');
-    if (input.uploadAttemptsPerChunk !== undefined &&
-        (!checkValidNumber(input.uploadAttemptsPerChunk) || input.uploadAttemptsPerChunk < 1)) {
+    if (input.uploadAttemptsPerChunk !== undefined && (!checkValidNumber(input.uploadAttemptsPerChunk) || input.uploadAttemptsPerChunk < 1)) {
         parameterError(errorMessage, 'uploadAttemptsPerChunk');
     }
     if (input.storeOnIndex !== undefined && !checkValidBoolean(input.storeOnIndex))
@@ -146,8 +145,6 @@ function checkUpdateMetadataParams(input) {
         parameterError(errorMessage, 'name');
     if (!input.description || !checkValidString(input.description))
         parameterError(errorMessage, 'description');
-    if (!input.chunkNum || !checkValidNumber(input.chunkNum))
-        parameterError(errorMessage, 'chunkNum');
     return input;
 }
 exports.checkUpdateMetadataParams = checkUpdateMetadataParams;

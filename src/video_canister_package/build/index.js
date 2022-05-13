@@ -47,7 +47,6 @@ class ICVideoStorage {
             principal: videoPrincipal,
             name: video.name,
             description: video.description,
-            chunkNum,
         });
         await this.updateVideo({
             identity,
@@ -111,13 +110,14 @@ class ICVideoStorage {
         }
     }
     async updateMetadata(input) {
-        const { identity, principal, name, description, chunkNum } = (0, parameter_check_1.checkUpdateMetadataParams)(input);
+        const { identity, principal, name, description } = (0, parameter_check_1.checkUpdateMetadataParams)(input);
         const httpAgent = await (0, common_1.getHttpAgent)(identity, this.config.host);
         const videoActor = await (0, common_1.getCanisterActor)("VIDEO_CANISTER" /* VIDEO_CANISTER */, principal, httpAgent);
         await (0, common_1.executeVideoCanisterPut)(() => videoActor.put_meta_info({
-            name: name,
-            description: description,
-            chunk_num: chunkNum,
+            name: [name],
+            description: [description],
+            // chunk_num is set in updateVideo
+            chunk_num: [],
         }), 'Could not put meta info into video canister');
     }
     async updateVideo(input) {
@@ -125,6 +125,13 @@ class ICVideoStorage {
         const httpAgent = await (0, common_1.getHttpAgent)(identity, this.config.host);
         const videoActor = await (0, common_1.getCanisterActor)("VIDEO_CANISTER" /* VIDEO_CANISTER */, principal, httpAgent);
         const promises = [];
+        await (0, common_1.executeVideoCanisterPut)(() => videoActor.put_meta_info({
+            // name is set in updateVideo
+            name: [],
+            // description is set in updateVideo
+            description: [],
+            chunk_num: [input.chunkNum],
+        }), 'Could not put chunk_num into video canister');
         for (let i = 0; i < chunkNum; i++) {
             const chunkSlice = videoBuffer.slice(i * this.config.chunkSize, Math.min(videoBuffer.length, (i + 1) * this.config.chunkSize));
             const chunkArray = Array.from(chunkSlice);
