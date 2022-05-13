@@ -4,65 +4,67 @@ exports.ICVideoStorage = void 0;
 const principal_1 = require("@dfinity/principal");
 const common_1 = require("./common");
 const constants_1 = require("./constants");
-// forward the export of interfaces that are relevant for the package user
-// export { VideoToStore, Video, StorageConfig } from './interfaces';
-const defaultConfig = {
-    spawnCanisterPrincipal: constants_1.SPAWN_PRINCIPAL_ID,
-    indexCanisterPrincipal: constants_1.INDEX_PRINCIPAL_ID,
-    chunkSize: constants_1.CHUNK_SIZE,
-    storeOnIndex: true,
-};
+const parameter_check_1 = require("./parameter-check");
 class ICVideoStorage {
     constructor(config) {
-        this.config = JSON.parse(JSON.stringify(defaultConfig));
+        this.config = JSON.parse(JSON.stringify(constants_1.DEFAULT_CONFIG));
         if (config)
             this.updateConfig(config);
     }
     updateConfig(config) {
-        if (config.chunkSize)
+        (0, parameter_check_1.checkUpdateConfigParams)(config);
+        if (config.chunkSize !== undefined)
             this.config.chunkSize = config.chunkSize;
+        if (config.uploadAttemptsPerChunk !== undefined)
+            this.config.uploadAttemptsPerChunk = config.uploadAttemptsPerChunk;
         if (config.storeOnIndex !== undefined)
             this.config.storeOnIndex = config.storeOnIndex;
-        if (config.indexCanisterPrincipal)
-            this.config.indexCanisterPrincipal = config.indexCanisterPrincipal;
-        if (config.spawnCanisterPrincipal)
-            this.config.spawnCanisterPrincipal = config.spawnCanisterPrincipal;
+        if (config.indexCanisterPrincipalId)
+            this.config.indexCanisterPrincipalId = config.indexCanisterPrincipalId;
+        if (config.spawnCanisterPrincipalId)
+            this.config.spawnCanisterPrincipalId = config.spawnCanisterPrincipalId;
+        if (config.host)
+            this.config.host = config.host;
     }
-    async uploadVideo(identity, walletId, video, cycles) {
+    async uploadVideo(input) {
+        const { identity, walletId, video, cycles } = (0, parameter_check_1.checkUploadVideoParams)(input);
         if (cycles < constants_1.REQUIRED_CYCLES) {
             throw Error('Not enough cycles, need at least ' + constants_1.REQUIRED_CYCLES + ' for video canister creation');
         }
-        const videoPrincipal = await (0, common_1.createNewCanister)(identity, walletId, constants_1.REQUIRED_CYCLES, this.config.spawnCanisterPrincipal);
-        await (0, common_1.checkController)(identity, walletId, videoPrincipal);
+        const httpAgent = await (0, common_1.getHttpAgent)(identity, this.config.host);
+        const videoPrincipal = await (0, common_1.createNewCanister)(identity, walletId, cycles, this.config.spawnCanisterPrincipalId, httpAgent);
+        await (0, common_1.checkController)(walletId, videoPrincipal, httpAgent);
         const leftoverCycles = cycles - constants_1.REQUIRED_CYCLES;
         if (leftoverCycles > 0) {
-            await (0, common_1.depositCycles)(identity, walletId, videoPrincipal, leftoverCycles);
+            await (0, common_1.depositCycles)(walletId, videoPrincipal, leftoverCycles, httpAgent);
         }
-        const videoActor = await (0, common_1.getCanisterActor)(identity, "VIDEO_CANISTER" /* VIDEO_CANISTER */, videoPrincipal);
         let chunkNum = 0;
         if (video.videoBuffer.length !== 0) {
             chunkNum = Math.floor(video.videoBuffer.length / this.config.chunkSize) + 1;
         }
-        await (0, common_1.executeVideoCanisterPut)(() => videoActor.put_meta_info({
+        await this.updateMetadata({
+            identity,
+            principal: videoPrincipal,
             name: video.name,
             description: video.description,
-            chunk_num: chunkNum,
-        }), 'Could not put meta info into video canister');
-        const promises = [];
-        for (let i = 0; i < chunkNum; i++) {
-            const chunkSlice = video.videoBuffer.slice(i * this.config.chunkSize, Math.min(video.videoBuffer.length, (i + 1) * this.config.chunkSize));
-            const chunkArray = Array.from(chunkSlice);
-            promises.push((0, common_1.uploadChunk)(() => videoActor.put_chunk(i, chunkArray), `Could not put chunk <${i}> into the video canister`));
-        }
-        await Promise.all(promises);
+            chunkNum,
+        });
+        await this.updateVideo({
+            identity,
+            principal: videoPrincipal,
+            chunkNum,
+            videoBuffer: video.videoBuffer,
+        });
         if (this.config.storeOnIndex) {
-            const indexActor = await (0, common_1.getCanisterActor)(identity, "INDEX_CANISTER" /* INDEX_CANISTER */, principal_1.Principal.fromText(this.config.indexCanisterPrincipal));
+            const indexActor = await (0, common_1.getCanisterActor)("INDEX_CANISTER" /* INDEX_CANISTER */, principal_1.Principal.fromText(this.config.indexCanisterPrincipalId), httpAgent);
             await indexActor.post_video(videoPrincipal);
         }
         return videoPrincipal;
     }
     async getVideo(identity, principal) {
-        const actor = await (0, common_1.getCanisterActor)(identity, "VIDEO_CANISTER" /* VIDEO_CANISTER */, principal);
+        (0, parameter_check_1.checkGetVideoParams)(identity, principal);
+        const httpAgent = await (0, common_1.getHttpAgent)(identity, this.config.host);
+        const actor = await (0, common_1.getCanisterActor)("VIDEO_CANISTER" /* VIDEO_CANISTER */, principal, httpAgent);
         try {
             const metaInfo = (await actor.get_meta_info());
             const chunksAsPromises = [];
@@ -90,12 +92,16 @@ class ICVideoStorage {
             throw new Error('Unable to query video: ' + error);
         }
     }
-    async changeOwner(oldIdentity, oldWallet, videoPrincipal, newOwner, newOwnerWallet) {
-        await (0, common_1.changeCanisterController)(oldIdentity, oldWallet, videoPrincipal, newOwnerWallet);
-        await (0, common_1.changeVideoOwner)(oldIdentity, videoPrincipal, newOwner);
+    async changeOwner(input) {
+        const { oldIdentity, oldWallet, videoPrincipal, newOwner, newOwnerWallet } = (0, parameter_check_1.checkChangeOwnerParams)(input);
+        const httpAgent = await (0, common_1.getHttpAgent)(oldIdentity, this.config.host);
+        await (0, common_1.changeCanisterController)(oldWallet, videoPrincipal, newOwnerWallet, httpAgent);
+        await (0, common_1.changeVideoOwner)(videoPrincipal, newOwner, httpAgent);
     }
     async getMyVideos(identity) {
-        const indexActor = await (0, common_1.getCanisterActor)(identity, "INDEX_CANISTER" /* INDEX_CANISTER */, principal_1.Principal.fromText(this.config.indexCanisterPrincipal));
+        (0, parameter_check_1.checkGetMyVideosParams)(identity);
+        const httpAgent = await (0, common_1.getHttpAgent)(identity, this.config.host);
+        const indexActor = await (0, common_1.getCanisterActor)("INDEX_CANISTER" /* INDEX_CANISTER */, principal_1.Principal.fromText(this.config.indexCanisterPrincipalId), httpAgent);
         const optVideos = (await indexActor.get_my_videos());
         if (optVideos[0] === undefined) {
             return new Array();
@@ -103,6 +109,28 @@ class ICVideoStorage {
         else {
             return optVideos[0];
         }
+    }
+    async updateMetadata(input) {
+        const { identity, principal, name, description, chunkNum } = (0, parameter_check_1.checkUpdateMetadataParams)(input);
+        const httpAgent = await (0, common_1.getHttpAgent)(identity, this.config.host);
+        const videoActor = await (0, common_1.getCanisterActor)("VIDEO_CANISTER" /* VIDEO_CANISTER */, principal, httpAgent);
+        await (0, common_1.executeVideoCanisterPut)(() => videoActor.put_meta_info({
+            name: name,
+            description: description,
+            chunk_num: chunkNum,
+        }), 'Could not put meta info into video canister');
+    }
+    async updateVideo(input) {
+        const { identity, principal, chunkNum, videoBuffer } = (0, parameter_check_1.checkUpdateVideoParams)(input);
+        const httpAgent = await (0, common_1.getHttpAgent)(identity, this.config.host);
+        const videoActor = await (0, common_1.getCanisterActor)("VIDEO_CANISTER" /* VIDEO_CANISTER */, principal, httpAgent);
+        const promises = [];
+        for (let i = 0; i < chunkNum; i++) {
+            const chunkSlice = videoBuffer.slice(i * this.config.chunkSize, Math.min(videoBuffer.length, (i + 1) * this.config.chunkSize));
+            const chunkArray = Array.from(chunkSlice);
+            promises.push((0, common_1.uploadChunk)(() => videoActor.put_chunk(i, chunkArray), this.config.uploadAttemptsPerChunk, `Could not put chunk <${i}> into the video canister`));
+        }
+        await Promise.all(promises);
     }
 }
 exports.ICVideoStorage = ICVideoStorage;

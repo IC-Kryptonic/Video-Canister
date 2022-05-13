@@ -1,4 +1,5 @@
 /// <reference types="node" />
+import { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 export interface Video {
     name: string;
@@ -30,14 +31,44 @@ export interface RawWalletResponse {
     };
 }
 export interface StorageConfig {
-    spawnCanisterPrincipal?: string;
-    indexCanisterPrincipal?: string;
+    spawnCanisterPrincipalId?: string;
+    indexCanisterPrincipalId?: string;
     chunkSize?: number;
+    uploadAttemptsPerChunk?: number;
     storeOnIndex?: boolean;
+    host?: string;
 }
 export interface InternalStorageConfig extends StorageConfig {
-    spawnCanisterPrincipal: string;
-    indexCanisterPrincipal: string;
+    spawnCanisterPrincipalId: string;
+    indexCanisterPrincipalId: string;
     chunkSize: number;
+    uploadAttemptsPerChunk: number;
     storeOnIndex: boolean;
+    host: string;
+}
+export interface UploadVideo {
+    identity: Identity;
+    walletId: Principal;
+    video: VideoToStore;
+    cycles: bigint;
+}
+export interface ChangeOwner {
+    oldIdentity: Identity;
+    oldWallet: Principal;
+    videoPrincipal: Principal;
+    newOwner: Principal;
+    newOwnerWallet: Principal;
+}
+export interface UpdateVideo {
+    identity: Identity;
+    principal: Principal;
+    chunkNum: number;
+    videoBuffer: Buffer;
+}
+export interface UpdateMetadata {
+    identity: Identity;
+    principal: Principal;
+    name: string;
+    description: string;
+    chunkNum: number;
 }
