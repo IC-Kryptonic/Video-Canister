@@ -80,5 +80,4 @@ export interface UpdateMetadata {
   principal: Principal;
   name: string;
   description: string;
-  chunkNum: number;
 }

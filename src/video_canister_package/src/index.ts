@@ -68,7 +68,6 @@ export class ICVideoStorage {
       principal: videoPrincipal,
       name: video.name,
       description: video.description,
-      chunkNum,
     });
 
     await this.updateVideo({
@@ -153,16 +152,17 @@ export class ICVideoStorage {
   }
 
   async updateMetadata(input: UpdateMetadata) {
-    const { identity, principal, name, description, chunkNum } = checkUpdateMetadataParams(input);
+    const { identity, principal, name, description } = checkUpdateMetadataParams(input);
     const httpAgent = await getHttpAgent(identity, this.config.host);
     const videoActor = await getCanisterActor(CANISTER_TYPE.VIDEO_CANISTER, principal, httpAgent);
 
     await executeVideoCanisterPut(
       () =>
         videoActor.put_meta_info({
-          name: name,
-          description: description,
-          chunk_num: chunkNum,
+          name: [name],
+          description: [description],
+          // chunk_num is set in updateVideo
+          chunk_num: [],
         }),
       'Could not put meta info into video canister',
     );
@@ -173,6 +173,18 @@ export class ICVideoStorage {
     const httpAgent = await getHttpAgent(identity, this.config.host);
     const videoActor = await getCanisterActor(CANISTER_TYPE.VIDEO_CANISTER, principal, httpAgent);
     const promises: Array<Promise<void>> = [];
+
+    await executeVideoCanisterPut(
+      () =>
+        videoActor.put_meta_info({
+          // name is set in updateVideo
+          name: [],
+          // description is set in updateVideo
+          description: [],
+          chunk_num: [input.chunkNum],
+        }),
+      'Could not put chunk_num into video canister',
+    );
 
     for (let i = 0; i < chunkNum; i++) {
       const chunkSlice = videoBuffer.slice(i * this.config.chunkSize, Math.min(videoBuffer.length, (i + 1) * this.config.chunkSize));

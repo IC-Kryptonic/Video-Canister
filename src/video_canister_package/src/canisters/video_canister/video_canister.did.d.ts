@@ -13,13 +13,11 @@ export interface MetaInfo {
 }
 
 export type PutChunkResponse = { out_of_bounds: null } | { missing_rights: null } | { success: null };
-
 export interface PutMetaInfo {
-  name: string;
-  description: string;
-  chunk_num: bigint;
+  name: [] | [string];
+  description: [] | [string];
+  chunk_num: [] | [bigint];
 }
-
 export type PutMetaInfoResponse = { missing_rights: null } | { success: null };
 
 export interface _SERVICE {

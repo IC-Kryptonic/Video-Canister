@@ -83,14 +83,10 @@ export function checkUpdateConfigParams(input: StorageConfig) {
     }
   }
   if (input.chunkSize !== undefined && !checkValidChunkSize(input.chunkSize)) parameterError(errorMessage, 'chunkSize');
-  if (
-    input.uploadAttemptsPerChunk !== undefined &&
-    (!checkValidNumber(input.uploadAttemptsPerChunk) || input.uploadAttemptsPerChunk < 1)
-  ) {
+  if (input.uploadAttemptsPerChunk !== undefined && (!checkValidNumber(input.uploadAttemptsPerChunk) || input.uploadAttemptsPerChunk < 1)) {
     parameterError(errorMessage, 'uploadAttemptsPerChunk');
   }
-  if (input.storeOnIndex !== undefined && !checkValidBoolean(input.storeOnIndex))
-    parameterError(errorMessage, 'storeOnIndex');
+  if (input.storeOnIndex !== undefined && !checkValidBoolean(input.storeOnIndex)) parameterError(errorMessage, 'storeOnIndex');
 }
 
 export function checkUploadVideoParams(input: UploadVideo): UploadVideo {
@@ -148,7 +144,6 @@ export function checkUpdateMetadataParams(input: UpdateMetadata): UpdateMetadata
   if (!input.identity || !checkValidIdentity(input.identity)) parameterError(errorMessage, 'identity');
   if (!input.name || !checkValidString(input.name)) parameterError(errorMessage, 'name');
   if (!input.description || !checkValidString(input.description)) parameterError(errorMessage, 'description');
-  if (!input.chunkNum || !checkValidNumber(input.chunkNum)) parameterError(errorMessage, 'chunkNum');
 
   return input;
 }

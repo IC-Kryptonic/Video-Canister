@@ -10,10 +10,10 @@ type Chunk = Vec<u8>;
 type Chunks = Vec<Chunk>;
 
 #[derive(CandidType, Deserialize)]
-pub struct PutMetaInfo{
-    pub name: String,
-    pub description: String,
-    pub chunk_num: usize,
+pub struct PutMetaInfo {
+    pub name: Option<String>,
+    pub description: Option<String>,
+    pub chunk_num: Option<usize>,
 }
 
 #[derive(CandidType, Deserialize)]
@@ -92,24 +92,35 @@ pub async fn init(owner: Principal){
 }
 
 #[update]
-pub async fn put_meta_info(new_meta_info: PutMetaInfo) -> PutMetaInfoResponse{
-    if META_INFO.with(|meta_info| meta_info.borrow().owner != ic_cdk::caller()){ 
+pub async fn put_meta_info(new_meta_info: PutMetaInfo) -> PutMetaInfoResponse {
+    if META_INFO.with(|meta_info| meta_info.borrow().owner != ic_cdk::caller()) {
         return PutMetaInfoResponse::MissingRights;
     }
     META_INFO.with(|meta_info| {
         let mut existing_meta_info = meta_info.borrow_mut();
 
+        match new_meta_info.chunk_num {
+            None => (),
+            Some(chunk_num) => {
+                if existing_meta_info.chunk_num != chunk_num {
         //Resize chunk array
-        if existing_meta_info.chunk_num != new_meta_info.chunk_num{
             CHUNKS.with(|chunks| {
-                chunks.borrow_mut().resize(new_meta_info.chunk_num, vec![]);
+                        chunks.borrow_mut().resize(chunk_num, vec![]);
             });
+                    existing_meta_info.chunk_num = chunk_num;
+                }
+            }
+        }
             
-            existing_meta_info.chunk_num = new_meta_info.chunk_num;
+        match new_meta_info.name {
+            None => (),
+            Some(name) => existing_meta_info.name = name,
         }
 
-        existing_meta_info.name = new_meta_info.name;
-        existing_meta_info.description = new_meta_info.description;
+        match new_meta_info.description {
+            None => (),
+            Some(description) => existing_meta_info.description = description,
+        }
     });
     return PutMetaInfoResponse::Success;
 }
