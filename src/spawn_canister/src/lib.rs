@@ -60,6 +60,7 @@ pub struct UpdateSettingsArg{
 static VIDEO_CANISTER_CODE: &[u8;  include_bytes!("../../../target/wasm32-unknown-unknown/release/video_canister_opt.wasm").len()] = include_bytes!("../../../target/wasm32-unknown-unknown/release/video_canister_opt.wasm");
 
 const MIN_CANISTER_CYCLES_REQUIRED: u64 = 200_000_000_000; //TODO rough guess, calculate correct costs
+const CYCLE_FEE: u64 = 600_000_000; // small fee big enough to keep the spawn canister alive
 
 #[update]
 pub async fn create_new_canister(owner: Principal) -> CreateCanisterResponse{
@@ -73,7 +74,8 @@ pub async fn create_new_canister(owner: Principal) -> CreateCanisterResponse{
         call::msg_cycles_accept(available_cycles);
     }
 
-    let canister_princ = match create_canister_on_network(available_cycles).await{
+    let forwarded_cycles = available_cycles - CYCLE_FEE;
+    let canister_princ = match create_canister_on_network(forwarded_cycles).await{
         Ok(new_princ) => new_princ,
         Err(_err_str) => {
             return CreateCanisterResponse::CanisterCreationError(_err_str);
