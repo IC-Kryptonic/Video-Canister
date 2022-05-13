@@ -41,6 +41,7 @@ export interface StorageConfig {
   chunkSize?: number;
   uploadAttemptsPerChunk?: number;
   storeOnIndex?: boolean;
+  host?: string;
 }
 
 export interface InternalStorageConfig extends StorageConfig {
@@ -49,6 +50,7 @@ export interface InternalStorageConfig extends StorageConfig {
   chunkSize: number;
   uploadAttemptsPerChunk: number;
   storeOnIndex: boolean;
+  host: string;
 }
 
 export interface UploadVideo {

@@ -3,12 +3,8 @@ import { Actor, HttpAgent, Identity } from '@dfinity/agent';
 import { IDL } from '@dfinity/candid';
 import { Principal } from '@dfinity/principal';
 
-import { CANISTER_IDL_MAP, CANISTER_TYPE, DEV_MODE, IC0HOST, LOCALHOST, MANAGEMENT_PRINCIPAL_ID } from './constants';
-import {
-  ChangeOwnerResponse,
-  PutChunkResponse,
-  PutMetaInfoResponse,
-} from './canisters/video_canister/video_canister.did';
+import { CANISTER_IDL_MAP, CANISTER_TYPE, MANAGEMENT_PRINCIPAL_ID } from './constants';
+import { ChangeOwnerResponse, PutChunkResponse, PutMetaInfoResponse } from './canisters/video_canister/video_canister.did';
 import { CanisterStatusResponse, CreateNewCanisterResponse, RawWalletResponse } from './interfaces';
 
 // fetch needs to be available internally for the HttpAgent
@@ -19,20 +15,19 @@ export const managementPrincipal = Principal.fromText(MANAGEMENT_PRINCIPAL_ID);
 let _identity: null | Identity = null;
 let _httpAgent: null | HttpAgent = null;
 
-const getHttpAgent = async (identity: Identity) => {
+export const getHttpAgent = async (identity: Identity, host: string) => {
   if (!_httpAgent || identity !== _identity) {
     _identity = identity;
     _httpAgent = new HttpAgent({
       identity,
-      host: DEV_MODE ? LOCALHOST : IC0HOST,
+      host,
     });
     await _httpAgent.fetchRootKey();
   }
   return _httpAgent;
 };
 
-export const getCanisterActor = async (identity: Identity, canisterType: CANISTER_TYPE, principal: Principal) => {
-  const httpAgent = await getHttpAgent(identity);
+export const getCanisterActor = async (canisterType: CANISTER_TYPE, principal: Principal, httpAgent: HttpAgent) => {
   const idl = CANISTER_IDL_MAP.get(canisterType);
   try {
     const actor = Actor.createActor(idl, {
@@ -42,9 +37,7 @@ export const getCanisterActor = async (identity: Identity, canisterType: CANISTE
     return actor;
   } catch (error) {
     console.error(error);
-    throw Error(
-      `Actor for canister of type <${canisterType}> with principal <${principal}> could not be created:` + error,
-    );
+    throw Error(`Actor for canister of type <${canisterType}> with principal <${principal}> could not be created:` + error);
   }
 };
 
@@ -84,19 +77,19 @@ export const uploadChunk = async (func: Function, uploadAttempts: number, errorM
   }
 };
 
-export async function changeVideoOwner(oldIdentity: Identity, videoPrincipal: Principal, newOwner: Principal) {
-  const videoCanister = await getCanisterActor(oldIdentity, CANISTER_TYPE.VIDEO_CANISTER, videoPrincipal);
+export async function changeVideoOwner(videoPrincipal: Principal, newOwner: Principal, httpAgent: HttpAgent) {
+  const videoCanister = await getCanisterActor(CANISTER_TYPE.VIDEO_CANISTER, videoPrincipal, httpAgent);
 
   await executeVideoCanisterPut(() => videoCanister.change_owner(newOwner), `Could not change owner of video canister`);
 }
 
 export async function changeCanisterController(
-  oldIdentity: Identity,
   oldWallet: Principal,
   videoPrincipal: Principal,
   newOwnerWallet: Principal,
+  httpAgent: HttpAgent,
 ) {
-  const walletActor = await getCanisterActor(oldIdentity, CANISTER_TYPE.WALLET_CANISTER, oldWallet);
+  const walletActor = await getCanisterActor(CANISTER_TYPE.WALLET_CANISTER, oldWallet, httpAgent);
 
   const encodedArgs = IDL.encode(
     [
@@ -144,10 +137,11 @@ export async function changeCanisterController(
 export async function createNewCanister(
   identity: Identity,
   walletId: Principal,
-  creationCycles: BigInt,
+  cycles: BigInt,
   spawnCanisterPrincipal: string,
+  httpAgent: HttpAgent,
 ): Promise<Principal> {
-  const walletActor = await getCanisterActor(identity, CANISTER_TYPE.WALLET_CANISTER, walletId);
+  const walletActor = await getCanisterActor(CANISTER_TYPE.WALLET_CANISTER, walletId, httpAgent);
 
   try {
     const spawnPrincipal = Principal.fromText(spawnCanisterPrincipal);
@@ -155,7 +149,7 @@ export async function createNewCanister(
       canister: spawnPrincipal,
       method_name: 'create_new_canister',
       args: [...Buffer.from(IDL.encode([IDL.Principal], [identity.getPrincipal()]))],
-      cycles: creationCycles,
+      cycles,
     })) as RawWalletResponse;
 
     if ('Ok' in walletResponse) {
@@ -189,8 +183,8 @@ export async function createNewCanister(
   }
 }
 
-export async function checkController(identity: Identity, wallet: Principal, video_canister: Principal) {
-  const walletActor = await getCanisterActor(identity, CANISTER_TYPE.WALLET_CANISTER, wallet);
+export async function checkController(wallet: Principal, video_canister: Principal, httpAgent: HttpAgent) {
+  const walletActor = await getCanisterActor(CANISTER_TYPE.WALLET_CANISTER, wallet, httpAgent);
 
   const encoded_args = IDL.encode([IDL.Record({ canister_id: IDL.Principal })], [{ canister_id: video_canister }]);
 
@@ -223,8 +217,7 @@ export async function checkController(identity: Identity, wallet: Principal, vid
         throw new Error('Video canister has too many controllers ' + controllers);
       } else {
         const controllerIsWallet = controllers[0].toText() === wallet.toText();
-        if (!controllerIsWallet)
-          throw new Error('Video Canister controller is not wallet, instead it is ' + controllers[0]);
+        if (!controllerIsWallet) throw new Error('Video Canister controller is not wallet, instead it is ' + controllers[0]);
       }
     }
   } catch (error) {
@@ -232,8 +225,8 @@ export async function checkController(identity: Identity, wallet: Principal, vid
   }
 }
 
-export async function depositCycles(identity: Identity, wallet: Principal, video_canister: Principal, cycles: bigint) {
-  const walletActor = await getCanisterActor(identity, CANISTER_TYPE.WALLET_CANISTER, wallet);
+export async function depositCycles(wallet: Principal, video_canister: Principal, cycles: bigint, httpAgent: HttpAgent) {
+  const walletActor = await getCanisterActor(CANISTER_TYPE.WALLET_CANISTER, wallet, httpAgent);
 
   const encoded_args = IDL.encode([IDL.Record({ canister_id: IDL.Principal })], [{ canister_id: video_canister }]);
 
@@ -245,13 +238,7 @@ export async function depositCycles(identity: Identity, wallet: Principal, video
       cycles: cycles,
     })) as RawWalletResponse;
 
-    if ('Ok' in walletResponse) {
-      /*
-      TODO decode and check wallet response
-      const encodedResponse = walletResponse.Ok.return;
-      const response = IDL.decode([], Buffer.from(raw_response))[0];
-      */
-    } else {
+    if (!('Ok' in walletResponse)) {
       console.error(walletResponse);
       throw Error(walletResponse.toString());
     }

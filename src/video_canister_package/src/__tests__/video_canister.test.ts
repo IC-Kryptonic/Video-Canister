@@ -2,31 +2,38 @@ import { AnonymousIdentity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { Secp256k1KeyIdentity } from '@dfinity/identity';
 import { ICVideoStorage } from '../index';
-import { VideoToStore } from '../interfaces';
+import { StorageConfig, VideoToStore } from '../interfaces';
 
 jest.setTimeout(30_000);
 
 const videoCanisterVersion = 0n;
 
 const anonWalletPrincipal = 'rno2w-sqaaa-aaaaa-aaacq-cai';
+const videoCanisterPrincipal = 'renrk-eyaaa-aaaaa-aaada-cai';
+
+const testConfig: StorageConfig = {
+  spawnCanisterPrincipalId: 'ryjl3-tyaaa-aaaaa-aaaba-cai',
+  indexCanisterPrincipalId: 'rkp4c-7iaaa-aaaaa-aaaca-cai',
+  host: 'http://127.0.0.1:8000/',
+};
 
 test('initStorage', async () => {
   const expectedStoreOnIndex = false;
-  const storage = new ICVideoStorage({ storeOnIndex: expectedStoreOnIndex });
+  const storage = new ICVideoStorage({ ...testConfig, storeOnIndex: expectedStoreOnIndex });
 
   expect(storage.config.storeOnIndex).toBe(expectedStoreOnIndex);
 });
 
 test('getVideo', async () => {
-  const storage = new ICVideoStorage();
-  const video = await storage.getVideo(new AnonymousIdentity(), Principal.fromText('renrk-eyaaa-aaaaa-aaada-cai'));
+  const storage = new ICVideoStorage(testConfig);
+  const video = await storage.getVideo(new AnonymousIdentity(), Principal.fromText(videoCanisterPrincipal));
 
   expect(video.name).toBe('test_name');
   expect(video.videoBuffer).toStrictEqual(Buffer.from([0xca, 0xff, 0xee]));
 });
 
 test('createVideo', async () => {
-  const storage = new ICVideoStorage({ storeOnIndex: false });
+  const storage = new ICVideoStorage({ ...testConfig, storeOnIndex: false });
   const video: VideoToStore = {
     name: 'test1',
     description: 'this is a desc',
@@ -54,7 +61,7 @@ test('createVideo', async () => {
 });
 
 test('changeOwner', async () => {
-  const storage = new ICVideoStorage({ storeOnIndex: false });
+  const storage = new ICVideoStorage({ ...testConfig, storeOnIndex: false });
   const video: VideoToStore = {
     name: 'test1',
     description: 'this is a desc',
@@ -95,7 +102,7 @@ test('changeOwner', async () => {
 });
 
 test('indexVideo', async () => {
-  const storage = new ICVideoStorage();
+  const storage = new ICVideoStorage(testConfig);
   const video: VideoToStore = {
     name: 'test1',
     description: 'this is a desc',

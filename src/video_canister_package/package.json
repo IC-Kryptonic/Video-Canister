@@ -10,13 +10,13 @@
   "scripts": {
     "start": "ts-node src/index",
     "build": "tsc",
-    "test": "NODE_ENV=DEV SPAWN_PRINCIPAL_ID='ryjl3-tyaaa-aaaaa-aaaba-cai' INDEX_PRINCIPAL_ID='rkp4c-7iaaa-aaaaa-aaaca-cai' jest --config jestconfig.json"
+    "test": "jest --config jestconfig.json"
   },
   "author": "moritz, alwin",
   "license": "MIT",
   "dependencies": {
-    "@dfinity/agent": "0.10.3",
-    "@dfinity/identity": "0.10.3",
+    "@dfinity/agent": "0.11.1",
+    "@dfinity/identity": "0.11.1",
     "dotenv": "^16.0.0",
     "node-fetch": "2.6.7"
   },

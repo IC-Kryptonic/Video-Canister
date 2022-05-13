@@ -10,18 +10,11 @@ import {
   depositCycles,
   executeVideoCanisterPut,
   getCanisterActor,
+  getHttpAgent,
   uploadChunk,
 } from './common';
 import { CANISTER_TYPE, REQUIRED_CYCLES, DEFAULT_CONFIG } from './constants';
-import {
-  Video,
-  StorageConfig,
-  InternalStorageConfig,
-  UpdateMetadata,
-  UpdateVideo,
-  UploadVideo,
-  ChangeOwner,
-} from './interfaces';
+import { Video, StorageConfig, InternalStorageConfig, UpdateMetadata, UpdateVideo, UploadVideo, ChangeOwner } from './interfaces';
 import {
   checkChangeOwnerParams,
   checkGetMyVideosParams,
@@ -46,6 +39,7 @@ export class ICVideoStorage {
     if (config.storeOnIndex !== undefined) this.config.storeOnIndex = config.storeOnIndex;
     if (config.indexCanisterPrincipalId) this.config.indexCanisterPrincipalId = config.indexCanisterPrincipalId;
     if (config.spawnCanisterPrincipalId) this.config.spawnCanisterPrincipalId = config.spawnCanisterPrincipalId;
+    if (config.host) this.config.host = config.host;
   }
 
   async uploadVideo(input: UploadVideo): Promise<Principal> {
@@ -54,18 +48,14 @@ export class ICVideoStorage {
       throw Error('Not enough cycles, need at least ' + REQUIRED_CYCLES + ' for video canister creation');
     }
 
-    const videoPrincipal = await createNewCanister(
-      identity,
-      walletId,
-      REQUIRED_CYCLES,
-      this.config.spawnCanisterPrincipalId,
-    );
+    const httpAgent = await getHttpAgent(identity, this.config.host);
+    const videoPrincipal = await createNewCanister(identity, walletId, cycles, this.config.spawnCanisterPrincipalId, httpAgent);
 
-    await checkController(identity, walletId, videoPrincipal);
+    await checkController(walletId, videoPrincipal, httpAgent);
 
     const leftoverCycles = cycles - REQUIRED_CYCLES;
     if (leftoverCycles > 0) {
-      await depositCycles(identity, walletId, videoPrincipal, leftoverCycles);
+      await depositCycles(walletId, videoPrincipal, leftoverCycles, httpAgent);
     }
 
     let chunkNum = 0;
@@ -90,9 +80,9 @@ export class ICVideoStorage {
 
     if (this.config.storeOnIndex) {
       const indexActor = await getCanisterActor(
-        identity,
         CANISTER_TYPE.INDEX_CANISTER,
         Principal.fromText(this.config.indexCanisterPrincipalId),
+        httpAgent,
       );
       await indexActor.post_video(videoPrincipal);
     }
@@ -102,7 +92,9 @@ export class ICVideoStorage {
 
   async getVideo(identity: Identity, principal: Principal): Promise<Video> {
     checkGetVideoParams(identity, principal);
-    const actor = await getCanisterActor(identity, CANISTER_TYPE.VIDEO_CANISTER, principal);
+    const httpAgent = await getHttpAgent(identity, this.config.host);
+
+    const actor = await getCanisterActor(CANISTER_TYPE.VIDEO_CANISTER, principal, httpAgent);
 
     try {
       const metaInfo = (await actor.get_meta_info()) as MetaInfo;
@@ -138,16 +130,18 @@ export class ICVideoStorage {
 
   async changeOwner(input: ChangeOwner) {
     const { oldIdentity, oldWallet, videoPrincipal, newOwner, newOwnerWallet } = checkChangeOwnerParams(input);
-    await changeCanisterController(oldIdentity, oldWallet, videoPrincipal, newOwnerWallet);
-    await changeVideoOwner(oldIdentity, videoPrincipal, newOwner);
+    const httpAgent = await getHttpAgent(oldIdentity, this.config.host);
+    await changeCanisterController(oldWallet, videoPrincipal, newOwnerWallet, httpAgent);
+    await changeVideoOwner(videoPrincipal, newOwner, httpAgent);
   }
 
   async getMyVideos(identity: Identity): Promise<Principal[]> {
     checkGetMyVideosParams(identity);
+    const httpAgent = await getHttpAgent(identity, this.config.host);
     const indexActor = await getCanisterActor(
-      identity,
       CANISTER_TYPE.INDEX_CANISTER,
       Principal.fromText(this.config.indexCanisterPrincipalId),
+      httpAgent,
     );
     const optVideos = (await indexActor.get_my_videos()) as [[Principal]];
 
@@ -160,7 +154,8 @@ export class ICVideoStorage {
 
   async updateMetadata(input: UpdateMetadata) {
     const { identity, principal, name, description, chunkNum } = checkUpdateMetadataParams(input);
-    const videoActor = await getCanisterActor(identity, CANISTER_TYPE.VIDEO_CANISTER, principal);
+    const httpAgent = await getHttpAgent(identity, this.config.host);
+    const videoActor = await getCanisterActor(CANISTER_TYPE.VIDEO_CANISTER, principal, httpAgent);
 
     await executeVideoCanisterPut(
       () =>
@@ -175,14 +170,12 @@ export class ICVideoStorage {
 
   async updateVideo(input: UpdateVideo) {
     const { identity, principal, chunkNum, videoBuffer } = checkUpdateVideoParams(input);
-    const videoActor = await getCanisterActor(identity, CANISTER_TYPE.VIDEO_CANISTER, principal);
+    const httpAgent = await getHttpAgent(identity, this.config.host);
+    const videoActor = await getCanisterActor(CANISTER_TYPE.VIDEO_CANISTER, principal, httpAgent);
     const promises: Array<Promise<void>> = [];
 
     for (let i = 0; i < chunkNum; i++) {
-      const chunkSlice = videoBuffer.slice(
-        i * this.config.chunkSize,
-        Math.min(videoBuffer.length, (i + 1) * this.config.chunkSize),
-      );
+      const chunkSlice = videoBuffer.slice(i * this.config.chunkSize, Math.min(videoBuffer.length, (i + 1) * this.config.chunkSize));
       const chunkArray = Array.from(chunkSlice);
       promises.push(
         uploadChunk(

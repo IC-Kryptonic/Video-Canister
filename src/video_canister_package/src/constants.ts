@@ -7,13 +7,8 @@ import { idlFactory as walletCanisterIdl } from './canisters/wallet_canister/wal
 import { idlFactory as indexCanisterIdl } from './canisters/index_canister/indexCanister_idl.did';
 import { InternalStorageConfig } from './interfaces';
 
-export const DEV_MODE = process.env.NODE_ENV === 'DEV';
-
-// TODO adjust for mainnet
-export const SPAWN_PRINCIPAL_ID = DEV_MODE ? process.env.SPAWN_PRINCIPAL_ID || '' : 'ryjl3-tyaaa-aaaaa-aaaba-cai';
-export const INDEX_PRINCIPAL_ID = DEV_MODE ? process.env.INDEX_PRINCIPAL_ID || '' : 'rkp4c-7iaaa-aaaaa-aaaca-cai';
-
-export const LOCALHOST = 'http://localhost:8000';
+export const SPAWN_PRINCIPAL_ID = 'fvyzl-oaaaa-aaaal-qaxvq-cai';
+export const INDEX_PRINCIPAL_ID = 'fa7ig-piaaa-aaaal-qaxwa-cai';
 
 export const IC0HOST = 'https://ic0.app';
 
@@ -34,6 +29,7 @@ export const DEFAULT_CONFIG: InternalStorageConfig = {
   chunkSize: CHUNK_SIZE,
   storeOnIndex: true,
   uploadAttemptsPerChunk: UPLOAD_ATTEMPTS_PER_CHUNK,
+  host: IC0HOST,
 };
 
 export const enum CANISTER_TYPE {
@@ -44,7 +40,6 @@ export const enum CANISTER_TYPE {
   'INDEX_CANISTER' = 'INDEX_CANISTER',
 }
 
-// TODO define types for idls
 export const CANISTER_IDL_MAP = new Map<string, any>([
   [CANISTER_TYPE.MANAGEMENT_CANISTER, managementCanisterIdl],
   [CANISTER_TYPE.SPAWN_CANISTER, spawnCanisterIdl],

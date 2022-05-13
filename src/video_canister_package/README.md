@@ -70,6 +70,7 @@ The storage config comprises the parameters defined in the table below. If you d
 | storeOnIndex             | boolean        | true                          | Determines if location of created video canister is remembered in index canister        |
 | chunkSize                | number         | 1024                          | Size of the chunks that an uploaded video is split into in bytes (< 2MB)                |
 | uploadAttemptsPerChunk   | number         | 3                             | Maximum number of upload attempts per chunk before the upload throws an error.          |
+| host                     | string         | "https://ic0.app"             | Internet Computer host                                                                  |
 
 ###
 
