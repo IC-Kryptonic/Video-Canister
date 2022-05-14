@@ -99,27 +99,22 @@ pub async fn put_meta_info(new_meta_info: PutMetaInfo) -> PutMetaInfoResponse {
     META_INFO.with(|meta_info| {
         let mut existing_meta_info = meta_info.borrow_mut();
 
-        match new_meta_info.chunk_num {
-            None => (),
-            Some(chunk_num) => {
-                if existing_meta_info.chunk_num != chunk_num {
-        //Resize chunk array
-            CHUNKS.with(|chunks| {
-                        chunks.borrow_mut().resize(chunk_num, vec![]);
-            });
-                    existing_meta_info.chunk_num = chunk_num;
-                }
+        if let Some(chunk_num) = new_meta_info.chunk_num {
+            if existing_meta_info.chunk_num != chunk_num {
+                //Resize chunk array
+                CHUNKS.with(|chunks| {
+                    chunks.borrow_mut().resize(chunk_num, vec![]);
+                });
+                existing_meta_info.chunk_num = chunk_num;
             }
         }
             
-        match new_meta_info.name {
-            None => (),
-            Some(name) => existing_meta_info.name = name,
+        if let Some(name) = new_meta_info.name {
+            existing_meta_info.name = name;
         }
 
-        match new_meta_info.description {
-            None => (),
-            Some(description) => existing_meta_info.description = description,
+        if let Some(description) = new_meta_info.description {
+            existing_meta_info.description = description;
         }
     });
     return PutMetaInfoResponse::Success;
