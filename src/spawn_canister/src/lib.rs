@@ -59,8 +59,8 @@ pub struct UpdateSettingsArg{
 
 static VIDEO_CANISTER_CODE: &[u8;  include_bytes!("../../../target/wasm32-unknown-unknown/release/video_canister_opt.wasm").len()] = include_bytes!("../../../target/wasm32-unknown-unknown/release/video_canister_opt.wasm");
 
-const MIN_CANISTER_CYCLES_REQUIRED: u64 = 200_000_000_000; //TODO rough guess, calculate correct costs
 const CYCLE_FEE: u64 = 600_000_000; // small fee big enough to keep the spawn canister alive
+const MIN_CANISTER_CYCLES_REQUIRED: u64 = 199_400_000_000 + CYCLE_FEE; //TODO rough guess, calculate correct costs
 
 #[update]
 pub async fn create_new_canister(owner: Principal) -> CreateCanisterResponse{
