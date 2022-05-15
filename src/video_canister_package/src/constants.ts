@@ -9,18 +9,15 @@ import { InternalStorageConfig } from './interfaces';
 
 export const SPAWN_PRINCIPAL_ID = 'yllyf-jqaaa-aaaal-qaz5q-cai';
 export const INDEX_PRINCIPAL_ID = 'ljn74-3iaaa-aaaaj-aekua-cai';
+export const MANAGEMENT_PRINCIPAL_ID = 'aaaaa-aa';
 
 export const IC0HOST = 'https://ic0.app';
-
-export const MANAGEMENT_PRINCIPAL_ID = 'aaaaa-aa';
 
 export const REQUIRED_CYCLES: bigint = BigInt(200_000_000_000);
 
 export const CHUNK_SIZE = 100000;
-// TODO confirm
-export const MIN_CHUNK_SIZE = 1;
-export const MAX_CHUNK_SIZE = 15000000;
-
+export const MIN_CHUNK_SIZE = 1000;
+export const MAX_CHUNK_SIZE = 2000000;
 export const UPLOAD_ATTEMPTS_PER_CHUNK = 3;
 
 export const DEFAULT_CONFIG: InternalStorageConfig = {
