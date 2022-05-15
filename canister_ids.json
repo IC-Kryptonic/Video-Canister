@@ -1,11 +1,8 @@
 {
   "index_canister": {
-    "ic": "fa7ig-piaaa-aaaal-qaxwa-cai"
+    "ic": "ljn74-3iaaa-aaaaj-aekua-cai"
   },
   "spawn_canister": {
-    "ic": "fvyzl-oaaaa-aaaal-qaxvq-cai"
-  },
-  "video_canister": {
-    "ic": "6ccli-2qaaa-aaaal-qavgq-cai"
+    "ic": "yllyf-jqaaa-aaaal-qaz5q-cai"
   }
 }
