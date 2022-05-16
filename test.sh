@@ -14,7 +14,6 @@ dfx identity use default
 #create and optimize video canister
 dfx canister create video_canister
 dfx build video_canister
-ic-cdk-optimizer target/wasm32-unknown-unknown/release/video_canister.wasm -o target/wasm32-unknown-unknown/release/video_canister_opt.wasm
 
 
 #deploy spawn canister
