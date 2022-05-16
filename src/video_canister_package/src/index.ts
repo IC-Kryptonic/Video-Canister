@@ -32,6 +32,15 @@ export class ICVideoStorage {
     if (config) this.updateConfig(config);
   }
 
+  /**
+   * Updates storage config
+   * @param {number} [config.chunkSize] video chunk size
+   * @param {number} [config.uploadAttemptsPerChunk] maximum number of upload attempts per chunk
+   * @param {Boolean} [config.storeOnIndex] determines whether if created video canister principals are stored in the index canister
+   * @param {string} [config.indexCanisterPrincipalId] string representation of index canister principal
+   * @param {string} [config.spawnCanisterPrincipalId] string representation of spawn canister principal
+   * @param {string} [config.host] Internet Computer host
+   */
   updateConfig(config: StorageConfig) {
     checkUpdateConfigParams(config);
     if (config.chunkSize !== undefined) this.config.chunkSize = config.chunkSize;
@@ -42,6 +51,13 @@ export class ICVideoStorage {
     if (config.host) this.config.host = config.host;
   }
 
+  /**
+   * Creates new video canister and store video in it
+   * @param {Identity} input.identity caller's identity
+   * @param {Principal} input.walletId wallet owned by the caller to pay the cycles
+   * @param {Principal} input.video object with 'name', 'description' and 'videoBuffer'
+   * @param {BigInt} input.cycles amount of cycles for payment & transfer to the video canister
+   */
   async uploadVideo(input: UploadVideo): Promise<Principal> {
     const { identity, walletId, video, cycles } = checkUploadVideoParams(input);
     if (cycles < REQUIRED_CYCLES) {
@@ -89,6 +105,10 @@ export class ICVideoStorage {
     return videoPrincipal;
   }
 
+  /**
+   * Retrieves video from video canister
+   * @param {Principal} principal principal of the video canister
+   */
   async getVideo(principal: Principal): Promise<Video> {
     checkGetVideoParams(principal);
     const httpAgent = await getHttpAgent(new AnonymousIdentity(), this.config.host);
@@ -127,6 +147,14 @@ export class ICVideoStorage {
     }
   }
 
+  /**
+   * Changes the owner of a video canister
+   * @param {Identity} input.oldIdentity caller's / current owner's identity
+   * @param {Principal} input.oldWallet caller's / current owner's wallet principal
+   * @param {Principal} input.videoPrincipal principal of the video canister
+   * @param {Principal} input.newOwner new owner's principal
+   * @param {Principal} input.newOwnerWallet new owner's wallet principal
+   */
   async changeOwner(input: ChangeOwner) {
     const { oldIdentity, oldWallet, videoPrincipal, newOwner, newOwnerWallet } = checkChangeOwnerParams(input);
     const httpAgent = await getHttpAgent(oldIdentity, this.config.host);
@@ -151,6 +179,13 @@ export class ICVideoStorage {
     }
   }
 
+  /**
+   * Updates metadata in an already existing video canister
+   * @param {Identity} input.identity caller's identity
+   * @param {Principal} input.videoPrincipal principal of the video canister
+   * @param {string} input.newName new video name
+   * @param {string} input.newDescription new video description
+   */
   async updateMetadata(input: UpdateMetadata) {
     const { identity, videoPrincipal, newName, newDescription } = checkUpdateMetadataParams(input);
     const httpAgent = await getHttpAgent(identity, this.config.host);
@@ -168,6 +203,13 @@ export class ICVideoStorage {
     );
   }
 
+  /**
+   * Updates video in an already existing video canister
+   * @param {Identity} input.identity caller's identity
+   * @param {Principal} input.videoPrincipal principal of the video canister
+   * @param {Buffer} input.newVideoBuffer the video buffer to put into the canister
+   * @param {number} input.newChunkNum the number of chunks (video length / chunk size)
+   */
   async updateVideo(input: UpdateVideo) {
     const { identity, videoPrincipal, newChunkNum, newVideoBuffer } = checkUpdateVideoParams(input);
     const httpAgent = await getHttpAgent(identity, this.config.host);
