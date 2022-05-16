@@ -70,14 +70,14 @@ export interface ChangeOwner {
 
 export interface UpdateVideo {
   identity: Identity;
-  principal: Principal;
-  chunkNum: number;
-  videoBuffer: Buffer;
+  videoPrincipal: Principal;
+  newChunkNum: number;
+  newVideoBuffer: Buffer;
 }
 
 export interface UpdateMetadata {
   identity: Identity;
-  principal: Principal;
-  name: string;
-  description: string;
+  videoPrincipal: Principal;
+  newName: string;
+  newDescription: string;
 }

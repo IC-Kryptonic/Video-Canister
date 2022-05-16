@@ -1,3 +1,6 @@
+// these are only very basic tests
+// see more tests here https://github.com/IC-Kryptonic/Video-Canister-Tests
+
 import { AnonymousIdentity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { Secp256k1KeyIdentity } from '@dfinity/identity';

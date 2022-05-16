@@ -137,12 +137,12 @@ export function checkUpdateMetadataParams(input: UpdateMetadata): UpdateMetadata
   const errorMessage =
     `Invalid parameters for method 'updateMetadata'\n` +
     `Expected input:\n{\n  ` +
-    `principal: Principal\n  identity: Identity\n  name: string\n  description: string\n  chunkNum: number\n}`;
+    `videoPrincipal: Principal\n  identity: Identity\n  newName: string\n  newDescription: string\n}`;
 
-  if (!input.principal || !checkValidPrincipal(input.principal)) parameterError(errorMessage, 'principal');
+  if (!input.videoPrincipal || !checkValidPrincipal(input.videoPrincipal)) parameterError(errorMessage, 'videoPrincipal');
   if (!input.identity || !checkValidIdentity(input.identity)) parameterError(errorMessage, 'identity');
-  if (!input.name || !checkValidString(input.name)) parameterError(errorMessage, 'name');
-  if (!input.description || !checkValidString(input.description)) parameterError(errorMessage, 'description');
+  if (!input.newName || !checkValidString(input.newName)) parameterError(errorMessage, 'newName');
+  if (!input.newDescription || !checkValidString(input.newDescription)) parameterError(errorMessage, 'newDescription');
 
   return input;
 }
@@ -151,12 +151,12 @@ export function checkUpdateVideoParams(input: UpdateVideo): UpdateVideo {
   const errorMessage =
     `Invalid parameters for method 'updateVideo'\n` +
     `Expected input:\n{\n  ` +
-    `principal: Principal\n  identity: Identity\n  videoBuffer: Buffer\n  chunkNum: number\n}`;
+    `videoPrincipal: Principal\n  identity: Identity\n  newVideoBuffer: Buffer\n  newChunkNum: number\n}`;
 
-  if (!input.principal || !checkValidPrincipal(input.principal)) parameterError(errorMessage, 'principal');
+  if (!input.videoPrincipal || !checkValidPrincipal(input.videoPrincipal)) parameterError(errorMessage, 'videoPrincipal');
   if (!input.identity || !checkValidIdentity(input.identity)) parameterError(errorMessage, 'identity');
-  if (!input.chunkNum || !checkValidNumber(input.chunkNum)) parameterError(errorMessage, 'chunkNum');
-  if (!input.videoBuffer || !checkValidBuffer(input.videoBuffer)) parameterError(errorMessage, 'videoBuffer');
+  if (!input.newChunkNum || !checkValidNumber(input.newChunkNum)) parameterError(errorMessage, 'newChunkNum');
+  if (!input.newVideoBuffer || !checkValidBuffer(input.newVideoBuffer)) parameterError(errorMessage, 'newVideoBuffer');
 
   return input;
 }

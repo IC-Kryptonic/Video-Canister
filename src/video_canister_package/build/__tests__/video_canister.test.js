@@ -1,4 +1,6 @@
 "use strict";
+// these are only very basic tests
+// see more tests here https://github.com/IC-Kryptonic/Video-Canister-Tests
 Object.defineProperty(exports, "__esModule", { value: true });
 const agent_1 = require("@dfinity/agent");
 const principal_1 = require("@dfinity/principal");
