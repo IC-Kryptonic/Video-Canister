@@ -1,4 +1,4 @@
-import { Identity } from '@dfinity/agent';
+import { AnonymousIdentity, Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 
 import { MetaInfo } from './canisters/video_canister/video_canister.did';
@@ -89,9 +89,9 @@ export class ICVideoStorage {
     return videoPrincipal;
   }
 
-  async getVideo(identity: Identity, principal: Principal): Promise<Video> {
-    checkGetVideoParams(identity, principal);
-    const httpAgent = await getHttpAgent(identity, this.config.host);
+  async getVideo(principal: Principal): Promise<Video> {
+    checkGetVideoParams(principal);
+    const httpAgent = await getHttpAgent(new AnonymousIdentity(), this.config.host);
 
     const actor = await getCanisterActor(CANISTER_TYPE.VIDEO_CANISTER, principal, httpAgent);
 

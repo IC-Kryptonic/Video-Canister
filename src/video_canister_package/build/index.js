@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ICVideoStorage = void 0;
+const agent_1 = require("@dfinity/agent");
 const principal_1 = require("@dfinity/principal");
 const common_1 = require("./common");
 const constants_1 = require("./constants");
@@ -60,9 +61,9 @@ class ICVideoStorage {
         }
         return videoPrincipal;
     }
-    async getVideo(identity, principal) {
-        (0, parameter_check_1.checkGetVideoParams)(identity, principal);
-        const httpAgent = await (0, common_1.getHttpAgent)(identity, this.config.host);
+    async getVideo(principal) {
+        (0, parameter_check_1.checkGetVideoParams)(principal);
+        const httpAgent = await (0, common_1.getHttpAgent)(new agent_1.AnonymousIdentity(), this.config.host);
         const actor = await (0, common_1.getCanisterActor)("VIDEO_CANISTER" /* VIDEO_CANISTER */, principal, httpAgent);
         try {
             const metaInfo = (await actor.get_meta_info());

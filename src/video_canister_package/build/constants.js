@@ -1,21 +1,20 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CANISTER_IDL_MAP = exports.DEFAULT_CONFIG = exports.UPLOAD_ATTEMPTS_PER_CHUNK = exports.MAX_CHUNK_SIZE = exports.MIN_CHUNK_SIZE = exports.CHUNK_SIZE = exports.REQUIRED_CYCLES = exports.MANAGEMENT_PRINCIPAL_ID = exports.IC0HOST = exports.INDEX_PRINCIPAL_ID = exports.SPAWN_PRINCIPAL_ID = void 0;
+exports.CANISTER_IDL_MAP = exports.DEFAULT_CONFIG = exports.UPLOAD_ATTEMPTS_PER_CHUNK = exports.MAX_CHUNK_SIZE = exports.MIN_CHUNK_SIZE = exports.CHUNK_SIZE = exports.REQUIRED_CYCLES = exports.IC0HOST = exports.MANAGEMENT_PRINCIPAL_ID = exports.INDEX_PRINCIPAL_ID = exports.SPAWN_PRINCIPAL_ID = void 0;
 require('dotenv').config();
 const videoCanister_idl_did_1 = require("./canisters/video_canister/videoCanister_idl.did");
 const spawnCanister_idl_did_1 = require("./canisters/spawn_canister/spawnCanister_idl.did");
 const managementCanister_idl_did_1 = require("./canisters/management_canister/managementCanister_idl.did");
 const walletCanister_idl_did_1 = require("./canisters/wallet_canister/walletCanister_idl.did");
 const indexCanister_idl_did_1 = require("./canisters/index_canister/indexCanister_idl.did");
-exports.SPAWN_PRINCIPAL_ID = 'fvyzl-oaaaa-aaaal-qaxvq-cai';
-exports.INDEX_PRINCIPAL_ID = 'fa7ig-piaaa-aaaal-qaxwa-cai';
-exports.IC0HOST = 'https://ic0.app';
+exports.SPAWN_PRINCIPAL_ID = 'yllyf-jqaaa-aaaal-qaz5q-cai';
+exports.INDEX_PRINCIPAL_ID = 'ljn74-3iaaa-aaaaj-aekua-cai';
 exports.MANAGEMENT_PRINCIPAL_ID = 'aaaaa-aa';
+exports.IC0HOST = 'https://ic0.app';
 exports.REQUIRED_CYCLES = BigInt(200000000000);
 exports.CHUNK_SIZE = 100000;
-// TODO confirm
-exports.MIN_CHUNK_SIZE = 1;
-exports.MAX_CHUNK_SIZE = 15000000;
+exports.MIN_CHUNK_SIZE = 1000;
+exports.MAX_CHUNK_SIZE = 2000000;
 exports.UPLOAD_ATTEMPTS_PER_CHUNK = 3;
 exports.DEFAULT_CONFIG = {
     spawnCanisterPrincipalId: exports.SPAWN_PRINCIPAL_ID,

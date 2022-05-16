@@ -6,7 +6,7 @@ export declare class ICVideoStorage {
     constructor(config?: StorageConfig);
     updateConfig(config: StorageConfig): void;
     uploadVideo(input: UploadVideo): Promise<Principal>;
-    getVideo(identity: Identity, principal: Principal): Promise<Video>;
+    getVideo(principal: Principal): Promise<Video>;
     changeOwner(input: ChangeOwner): Promise<void>;
     getMyVideos(identity: Identity): Promise<Principal[]>;
     updateMetadata(input: UpdateMetadata): Promise<void>;

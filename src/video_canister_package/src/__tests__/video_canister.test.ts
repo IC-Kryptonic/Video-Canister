@@ -26,7 +26,7 @@ test('initStorage', async () => {
 
 test('getVideo', async () => {
   const storage = new ICVideoStorage(testConfig);
-  const video = await storage.getVideo(new AnonymousIdentity(), Principal.fromText(videoCanisterPrincipal));
+  const video = await storage.getVideo(Principal.fromText(videoCanisterPrincipal));
 
   expect(video.name).toBe('test_name');
   expect(video.videoBuffer).toStrictEqual(Buffer.from([0xca, 0xff, 0xee]));
@@ -51,7 +51,7 @@ test('createVideo', async () => {
     cycles,
   });
 
-  const uploadedVideo = await storage.getVideo(anon, principal);
+  const uploadedVideo = await storage.getVideo(principal);
 
   expect(uploadedVideo.name).toBe(video.name);
   expect(uploadedVideo.description).toBe(video.description);
@@ -92,13 +92,9 @@ test('changeOwner', async () => {
     newOwnerWallet,
   });
 
-  const uploadedVideo = await storage.getVideo(anon, videoPrincipal);
+  const uploadedVideo = await storage.getVideo(videoPrincipal);
 
   expect(uploadedVideo.owner).toStrictEqual(newOwner);
-
-  //TODO how to test this?
-  //expect(controllers.len()).toStrictEqual(1);
-  //expect(controllers[0]).toStrictEqual(newOwnerWallet);
 });
 
 test('indexVideo', async () => {

@@ -3,7 +3,7 @@ import { Principal } from '@dfinity/principal';
 import { ChangeOwner, StorageConfig, UpdateMetadata, UpdateVideo, UploadVideo } from './interfaces';
 export declare function checkUpdateConfigParams(input: StorageConfig): void;
 export declare function checkUploadVideoParams(input: UploadVideo): UploadVideo;
-export declare function checkGetVideoParams(identity: Identity, principal: Principal): void;
+export declare function checkGetVideoParams(principal: Principal): void;
 export declare function checkChangeOwnerParams(input: ChangeOwner): ChangeOwner;
 export declare function checkGetMyVideosParams(identity: Identity): void;
 export declare function checkUpdateMetadataParams(input: UpdateMetadata): UpdateMetadata;

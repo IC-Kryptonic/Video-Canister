@@ -100,10 +100,8 @@ function checkUploadVideoParams(input) {
     return input;
 }
 exports.checkUploadVideoParams = checkUploadVideoParams;
-function checkGetVideoParams(identity, principal) {
-    const errorMessage = `Invalid parameters for method 'getVideo'\nExpected parameters: (identity: Identity, principal: Principal)`;
-    if (!checkValidIdentity(identity))
-        parameterError(errorMessage, 'identity');
+function checkGetVideoParams(principal) {
+    const errorMessage = `Invalid parameters for method 'getVideo'\nExpected parameters: (principal: Principal)`;
     if (!checkValidPrincipal(principal))
         parameterError(errorMessage, 'principal');
 }
