@@ -26,7 +26,7 @@ Our solution consists of four components:
 
 - [Index Canister](https://github.com/IC-Kryptonic/Video-Canister/tree/master/src/index_canister): You can use this canister optionally with the NPM package in order to store which creator uploaded which video. For example, a canister like this would be useful if you built an application where you want to query all videos that a specific creator uploaded. There is a publicly deployed index canister that the package uses by default. You can also deploy your own index canister.
 
-- [Video Canister Package](https://github.com/IC-Kryptonic/Video-Canister/tree/master/src/video_canister_package): The NPM package allows you to easily integrate our streaming and storage API in your DAPP.
+- [Video Canister Package](https://github.com/IC-Kryptonic/Video-Canister/tree/master/src/video_canister_package): The NPM package allows you to easily integrate our streaming and storage API in your dApp.
 
 # User Actions
 
