@@ -1,8 +1,6 @@
 # DISCLAIMER
 
-This package is a WIP and not intended for public use as of now.
-
-Storing data on a Blockchain causes costs that cannot be refunded. Please us this package with care.
+Storing data on a Blockchain causes costs that cannot be refunded. Please use this package with care.
 
 We do not warrant flawless functionality of this package and do not bear the reponsibility of any (financial) damage caused by using it.
 
@@ -24,6 +22,8 @@ JavaScript and TypeScript library to easily store and stream videos using the [I
 
 [Motivation and Design Principles](https://github.com/IC-Kryptonic/Video-Canister#Design-Goals)
 
+[Canister Source Code](https://github.com/IC-Kryptonic/Video-Canister)
+
 #
 
 # Installation
@@ -40,7 +40,7 @@ Install the Package:
 
 Initialize a storage object in your application:
 
-`new ICVideoStorageObject(storageConfig: StorageConfig)`
+`new ICVideoStorage(storageConfig: StorageConfig)`
 
 Example:
 
@@ -63,14 +63,14 @@ If you need to chang the config for an existing storage object you can overwrite
 
 The storage config comprises the parameters defined in the table below. If you do not intend to change any default parameters, you don't need to provide a config object when initializing the storage object.
 
-| Parameter name           | Parameter Type | Default Value                 | Purpose                                                                                 |
-| ------------------------ | -------------- | ----------------------------- | --------------------------------------------------------------------------------------- |
-| spawnCanisterPrincipalId | String         | fvyzl-oaaaa-aaaal-qaxvq-cai\* | On-chain location of the spawn canister used to create video canisters                  |
-| indexCanisterPrincipalId | String         | fa7ig-piaaa-aaaal-qaxwa-cai\* | On-chain location of the index canister used to remember the location of created videos |
-| storeOnIndex             | boolean        | true                          | Determines if location of created video canister is remembered in index canister        |
-| chunkSize                | number         | 1024                          | Size of the chunks that an uploaded video is split into in bytes (< 2MB)                |
-| uploadAttemptsPerChunk   | number         | 3                             | Maximum number of upload attempts per chunk before the upload throws an error.          |
-| host                     | string         | "https://ic0.app"             | Internet Computer host                                                                  |
+| Parameter name           | Parameter Type | Default Value                 | Purpose                                                                                         |
+| ------------------------ | -------------- | ----------------------------- | ----------------------------------------------------------------------------------------------- |
+| spawnCanisterPrincipalId | string         | fvyzl-oaaaa-aaaal-qaxvq-cai\* | On-chain location of the spawn canister used to create video canisters                          |
+| indexCanisterPrincipalId | string         | fa7ig-piaaa-aaaal-qaxwa-cai\* | On-chain location of the index canister used to remember the location of created videos         |
+| storeOnIndex             | boolean        | true                          | Determines if location (principal) of created video canister(s) is remembered in index canister |
+| chunkSize                | number         | 100000                        | Size of the chunks that an uploaded video is split into in bytes (0.001MB <= chunkSize <= 2MB)  |
+| uploadAttemptsPerChunk   | number         | 3                             | Maximum number of upload attempts per chunk before the upload throws an error.                  |
+| host                     | string         | https://ic0.app               | Internet Computer host                                                                          |
 
 ###
 
@@ -92,10 +92,10 @@ Properties of type `UploadVideo` (Object)
 - video: VideoToStore (Object)
   - name: string
   - description: string
-  - file: Buffer
+  - videoBuffer: Buffer
 - cycles: bigint
 
-**Attention**: The defined cycles are withdrawn from the specified wallet to create the new canister. The minimum cycles required amount to 200_000_000_000. All further cycles are sent to created video canister.
+**Attention**: The defined cycles are withdrawn from the specified wallet to create the new canister. The minimum cycles required amount to 200_000_000_000. All unused cycles are sent to created video canister.
 
 Example:
 
@@ -119,6 +119,7 @@ const  video: VideoToStore = {
 const  anon = new  AnonymousIdentity();
 const  anonWallet = Principal.fromText(anonWalletPrincipal);
 
+// send enough cycles to create the video canister and upload the video
 const  cycles: bigint = BigInt(200_000_000_000);
 
 
@@ -131,6 +132,14 @@ const  principal: Principal = await storage.uploadVideo({
 });
 ```
 
+### Estimating the Required Amount of Cycles
+
+The amount of cycles required to create the video canister depends on the file size of the video. You can calculate an estimate of the required cycles with the `calculateCycleEstimate` function
+
+`calculateCycleEstimate(fileSize: number): bigint`
+
+_Disclaimer_: This function is still experimental and not optimized. It might estimate more cycles than needed. However, the cycle surplus is sent to the video canister.
+
 #
 
 ## Overriding the Metadata in a Video Canister
@@ -142,10 +151,9 @@ The `updateMetadata` function enables the owner of a video canister to update/ov
 Properties of type `UpdateMetadata` (input object):
 
 - identity: Identity (identity used to make the call, must be the current owner of the canister)
-- principal: Principal (principal of the video canister)
-- name: string (new video name)
-- description: string (new video description)
-- chunkNum: number (new number of chunks)
+- videoPrincipal: Principal (principal of the video canister)
+- newName: string (new video name)
+- newDescription: string (new video description)
 
 #
 
@@ -158,38 +166,25 @@ The `updateVideo` function enables the owner of a video canister to update/overr
 Properties of type `UpdateVideo` (input object):
 
 - identity: Identity (identity used to make the call, must be the current owner of the canister)
-- principal: Principal (principal of the video canister)
-- chunkNum: number (number of chunks that the Buffer is split into)
-- videoBuffer: Buffer (new video)
+- videoPrincipal: Principal (principal of the video canister)
+- newChunkNum: number (number of chunks that the Buffer is split into)
+- newVideoBuffer: Buffer (new video)
 
 #
 
 ## Streaming a Video from a Canister
 
-The `getVideo` function retrieves a stored video at a known location (provided through the `principal` parameter). The `identity` parameter is the identity of the caller.
+The `getVideo` function retrieves a stored video at a known location (provided through the `principal` parameter).
 
-`async getVideo(identity: Identity, principal: Principal): Promise<Video>`
+`async getVideo(principal: Principal): Promise<Video>`
 
 Properties of type `Video` (returned object):
 
 - name: string
 - description: string
-- version: bigint
+- version: bigint (canister version; needed in case we upgrade the video canister code in the future)
 - owner: Principal
 - videoBuffer: Buffer
-
-Example:
-
-```
-const storage = new ICVideoStorage();
-const principal: Principal = Principal.fromText('renrk-eyaaa-aaaaa-aaada-cai')
-const identity: Identity = new AnonymousIdentity();
-
-const video: Video = await storage.getVideo(
-  identity,
-  principal
-);
-```
 
 #
 

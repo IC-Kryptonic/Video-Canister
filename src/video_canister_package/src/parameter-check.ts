@@ -66,7 +66,7 @@ export function checkUpdateConfigParams(input: StorageConfig) {
     `Invalid config object\n` +
     `Valid object properties:\n{\n  ` +
     `spawnCanisterPrincipalId: string\n  indexCanisterPrincipalId: string\n  ` +
-    `chunkSize: number\n  uploadAttemptsPerChunk: number\n  storeOnIndex: boolean\n}`;
+    `chunkSize: number\n  uploadAttemptsPerChunk: number\n  storeOnIndex: boolean\n  host: string\n}`;
 
   if (input.spawnCanisterPrincipalId !== undefined) {
     try {
@@ -87,6 +87,7 @@ export function checkUpdateConfigParams(input: StorageConfig) {
     parameterError(errorMessage, 'uploadAttemptsPerChunk');
   }
   if (input.storeOnIndex !== undefined && !checkValidBoolean(input.storeOnIndex)) parameterError(errorMessage, 'storeOnIndex');
+  if (input.host !== undefined && !checkValidString(input.host)) parameterError(errorMessage, 'host');
 }
 
 export function checkUploadVideoParams(input: UploadVideo): UploadVideo {

@@ -67,12 +67,12 @@ export const uploadChunk = async (func: Function, uploadAttempts: number, errorM
         break;
       }
     } catch (error) {
-      console.error(error);
       lastError = `${errorMessage}: ` + error;
     }
   }
 
   if (!uploadSuccessful) {
+    console.error(lastError);
     throw new Error(lastError);
   }
 };

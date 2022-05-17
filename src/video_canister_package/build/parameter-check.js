@@ -59,7 +59,7 @@ function checkUpdateConfigParams(input) {
     const errorMessage = `Invalid config object\n` +
         `Valid object properties:\n{\n  ` +
         `spawnCanisterPrincipalId: string\n  indexCanisterPrincipalId: string\n  ` +
-        `chunkSize: number\n  uploadAttemptsPerChunk: number\n  storeOnIndex: boolean\n}`;
+        `chunkSize: number\n  uploadAttemptsPerChunk: number\n  storeOnIndex: boolean\n  host: string\n}`;
     if (input.spawnCanisterPrincipalId !== undefined) {
         try {
             principal_1.Principal.fromText(input.spawnCanisterPrincipalId);
@@ -83,6 +83,8 @@ function checkUpdateConfigParams(input) {
     }
     if (input.storeOnIndex !== undefined && !checkValidBoolean(input.storeOnIndex))
         parameterError(errorMessage, 'storeOnIndex');
+    if (input.host !== undefined && !checkValidString(input.host))
+        parameterError(errorMessage, 'host');
 }
 exports.checkUpdateConfigParams = checkUpdateConfigParams;
 function checkUploadVideoParams(input) {

@@ -19,9 +19,14 @@ export declare class ICVideoStorage {
      * @param {Identity} input.identity caller's identity
      * @param {Principal} input.walletId wallet owned by the caller to pay the cycles
      * @param {Principal} input.video object with 'name', 'description' and 'videoBuffer'
-     * @param {BigInt} input.cycles amount of cycles for payment & transfer to the video canister
+     * @param {bigint} input.cycles bigint amount of cycles for payment & transfer to the video canister
      */
     uploadVideo(input: UploadVideo): Promise<Principal>;
+    /**
+     * Experimental: Calculates an estimate amount of required cycles for the uploadVideo function
+     * @param {number} fileSize size of the file buffer
+     */
+    calculateCycleEstimate(fileSize: number): bigint;
     /**
      * Retrieves video from video canister
      * @param {Principal} principal principal of the video canister
