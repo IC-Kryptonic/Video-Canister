@@ -11,13 +11,13 @@ pub enum CreateCanisterResponse{
     InsufficientFunds,
 
     #[serde(rename = "canister_creation_error")]
-    CanisterCreationError,
+    CanisterCreationError(String),
 
     #[serde(rename = "canister_installation_error")]
-    CanisterInstallationError,
+    CanisterInstallationError(String),
 
     #[serde(rename = "change_controller_error")]
-    ChangeControllerError,
+    ChangeControllerError(String),
 }
 
 #[derive(CandidType, Deserialize)]
@@ -57,9 +57,10 @@ pub struct UpdateSettingsArg{
     settings: CanisterSettings,
 }
 
-static VIDEO_CANISTER_CODE: &[u8;  include_bytes!("../../../target/wasm32-unknown-unknown/release/video_canister_opt.wasm").len()] = include_bytes!("../../../target/wasm32-unknown-unknown/release/video_canister_opt.wasm");
+static VIDEO_CANISTER_CODE: &[u8;  include_bytes!("../../../target/wasm32-unknown-unknown/release/video_canister.wasm").len()] = include_bytes!("../../../target/wasm32-unknown-unknown/release/video_canister.wasm");
 
-const MIN_CANISTER_CYCLES_REQUIRED: u64 = 200_000_000_000; //TODO rough guess, calculate correct costs
+const CYCLE_FEE: u64 = 600_000_000; // small fee big enough to keep the spawn canister alive
+const MIN_CANISTER_CYCLES_REQUIRED: u64 = 199_400_000_000 + CYCLE_FEE;
 
 #[update]
 pub async fn create_new_canister(owner: Principal) -> CreateCanisterResponse{
@@ -73,28 +74,29 @@ pub async fn create_new_canister(owner: Principal) -> CreateCanisterResponse{
         call::msg_cycles_accept(available_cycles);
     }
 
-    let canister_princ = match create_canister_on_network().await{
+    let forwarded_cycles = available_cycles - CYCLE_FEE;
+    let canister_princ = match create_canister_on_network(forwarded_cycles).await{
         Ok(new_princ) => new_princ,
         Err(_err_str) => {
-            return CreateCanisterResponse::CanisterCreationError;
+            return CreateCanisterResponse::CanisterCreationError(_err_str);
         }
     };
 
     if let Err(_err_str) = install_video_canister(canister_princ.clone(), &owner).await{
-        return CreateCanisterResponse::CanisterInstallationError;
+        return CreateCanisterResponse::CanisterInstallationError(_err_str);
     };
 
     if let Err(_err_str) = change_controller_to_owner(canister_princ.clone(), &owner_wallet).await{
-        return CreateCanisterResponse::ChangeControllerError;
+        return CreateCanisterResponse::ChangeControllerError(_err_str);
     }
 
     return CreateCanisterResponse::Created(canister_princ);
 }
 
-async fn create_canister_on_network() -> Result<Principal, String>{
+async fn create_canister_on_network(cycles: u64) -> Result<Principal, String>{
     let manage_princ = Principal::management_canister();
 
-    let response: Result<(CreateCanisterResult, ), _> = call::call(manage_princ, "create_canister", ()).await;
+    let response: Result<(CreateCanisterResult, ), _> = call::call_with_payment(manage_princ, "create_canister", (), cycles).await;
 
     match response{
         Ok(res) => {

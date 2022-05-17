@@ -1,0 +1,13 @@
+import { HttpAgent, Identity } from '@dfinity/agent';
+import { Principal } from '@dfinity/principal';
+import { CANISTER_TYPE } from './constants';
+export declare const managementPrincipal: Principal;
+export declare const getHttpAgent: (identity: Identity, host: string) => Promise<HttpAgent>;
+export declare const getCanisterActor: (canisterType: CANISTER_TYPE, principal: Principal, httpAgent: HttpAgent) => Promise<import("@dfinity/agent").ActorSubclass<Record<string, import("@dfinity/agent").ActorMethod<unknown[], unknown>>>>;
+export declare const executeVideoCanisterPut: (func: Function, errorMessage: string) => Promise<void>;
+export declare const uploadChunk: (func: Function, uploadAttempts: number, errorMessage: string) => Promise<void>;
+export declare function changeVideoOwner(videoPrincipal: Principal, newOwner: Principal, httpAgent: HttpAgent): Promise<void>;
+export declare function changeCanisterController(oldWallet: Principal, videoPrincipal: Principal, newOwnerWallet: Principal, httpAgent: HttpAgent): Promise<void>;
+export declare function createNewCanister(identity: Identity, walletId: Principal, cycles: BigInt, spawnCanisterPrincipal: string, httpAgent: HttpAgent): Promise<Principal>;
+export declare function checkController(wallet: Principal, video_canister: Principal, httpAgent: HttpAgent): Promise<void>;
+export declare function depositCycles(wallet: Principal, video_canister: Principal, cycles: bigint, httpAgent: HttpAgent): Promise<void>;

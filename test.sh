@@ -14,7 +14,6 @@ dfx identity use default
 #create and optimize video canister
 dfx canister create video_canister
 dfx build video_canister
-ic-cdk-optimizer target/wasm32-unknown-unknown/release/video_canister.wasm -o target/wasm32-unknown-unknown/release/video_canister_opt.wasm
 
 
 #deploy spawn canister
@@ -40,7 +39,7 @@ dfx canister call $video_principal put_chunk '(0 : nat64, blob "\CA\FF\EE")'
 #start package tests
 pushd src/video_canister_package
 npm install
-npm test
+npm test -- video_canister.test.ts
 popd
 
 #clean up

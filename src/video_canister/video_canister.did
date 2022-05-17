@@ -1,9 +1,9 @@
 type Chunk = blob;
 
 type PutMetaInfo = record {
-    "name": text;
-    "description": text;
-    "chunk_num": nat64;
+    "name": opt text;
+    "description": opt text;
+    "chunk_num": opt nat64;
 };
 
 type MetaInfo = record {

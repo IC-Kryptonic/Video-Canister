@@ -2,16 +2,18 @@ use ic_cdk::export::candid::{CandidType, Deserialize, Principal,};
 use ic_cdk_macros::{update, query, init, pre_upgrade, post_upgrade};
 use ic_cdk::storage;
 
+use std::cell::RefCell;
+
 const CANISTER_VERSION: usize = 0usize;
 
 type Chunk = Vec<u8>;
 type Chunks = Vec<Chunk>;
 
 #[derive(CandidType, Deserialize)]
-pub struct PutMetaInfo{
-    pub name: String,
-    pub description: String,
-    pub chunk_num: usize,
+pub struct PutMetaInfo {
+    pub name: Option<String>,
+    pub description: Option<String>,
+    pub chunk_num: Option<usize>,
 }
 
 #[derive(CandidType, Deserialize)]
@@ -33,6 +35,18 @@ impl Default for MetaInfo{
             owner: Principal::anonymous(),
         }
      }
+}
+
+impl Clone for MetaInfo{
+    fn clone(&self) -> Self {
+        MetaInfo{
+            name: self.name.clone(),
+            description: self.description.clone(),
+            chunk_num: self.chunk_num,
+            version: self.version,
+            owner: self.owner,
+        }
+    }
 }
 
 #[derive(CandidType, Deserialize)]
@@ -65,86 +79,113 @@ pub enum ChangeOwnerResponse{
     MissingRights,
 }
 
+thread_local! {
+    static META_INFO: RefCell<MetaInfo> = RefCell::new(MetaInfo::default());
+    static CHUNKS: RefCell<Chunks> = RefCell::new(Chunks::new());
+}
+
 #[init]
 pub async fn init(owner: Principal){
-    storage::get_mut::<MetaInfo>().owner = owner;
+    META_INFO.with(|meta_info| {
+        meta_info.borrow_mut().owner = owner;
+    });
 }
 
 #[update]
-pub async fn put_meta_info(new_meta_info: PutMetaInfo) -> PutMetaInfoResponse{
-    let mut existing_meta_info = storage::get_mut::<MetaInfo>();
-    if existing_meta_info.owner != ic_cdk::caller() {
+pub async fn put_meta_info(new_meta_info: PutMetaInfo) -> PutMetaInfoResponse {
+    if META_INFO.with(|meta_info| meta_info.borrow().owner != ic_cdk::caller()) {
         return PutMetaInfoResponse::MissingRights;
-    } else {
-        existing_meta_info.name = new_meta_info.name;
-        existing_meta_info.description = new_meta_info.description;
+    }
+    META_INFO.with(|meta_info| {
+        let mut existing_meta_info = meta_info.borrow_mut();
 
-        //Resize chunk array
-        if existing_meta_info.chunk_num != new_meta_info.chunk_num{
-            let chunks = storage::get_mut::<Chunks>();
-            chunks.resize(new_meta_info.chunk_num, vec![]);
-            existing_meta_info.chunk_num = new_meta_info.chunk_num;
+        if let Some(chunk_num) = new_meta_info.chunk_num {
+            if existing_meta_info.chunk_num != chunk_num {
+                //Resize chunk array
+                CHUNKS.with(|chunks| {
+                    chunks.borrow_mut().resize(chunk_num, vec![]);
+                });
+                existing_meta_info.chunk_num = chunk_num;
+            }
+        }
+            
+        if let Some(name) = new_meta_info.name {
+            existing_meta_info.name = name;
         }
 
-        return PutMetaInfoResponse::Success;
-    }
+        if let Some(description) = new_meta_info.description {
+            existing_meta_info.description = description;
+        }
+    });
+    return PutMetaInfoResponse::Success;
 }
 
 #[update]
 pub async fn put_chunk(chunk_num: usize, chunk: Chunk) -> PutChunkResponse{
-    let owner = (*storage::get::<MetaInfo>()).owner;
-    if owner != ic_cdk::caller() {
+    if META_INFO.with(|meta_info| meta_info.borrow().owner != ic_cdk::caller()){ 
         return PutChunkResponse::MissingRights;
-    } else {
-        let chunks = storage::get_mut::<Chunks>();
-
-        if chunk_num >= chunks.len(){
-            return PutChunkResponse::OutOfBounds;
-        }
-        
-        chunks[chunk_num] = chunk;
-        return PutChunkResponse::Success;
     }
+    return CHUNKS.with(|chunks| {
+        if chunk_num >= chunks.borrow().len(){
+            return PutChunkResponse::OutOfBounds
+        };
+        
+        chunks.borrow_mut()[chunk_num] = chunk;
+        return PutChunkResponse::Success
+    });
 }
 
 #[update]
 pub async fn change_owner(new_owner: Principal) -> ChangeOwnerResponse{
-    let old_owner = &mut storage::get_mut::<MetaInfo>().owner;
-
-    if *old_owner != ic_cdk::caller() {
-        return ChangeOwnerResponse::MissingRights;
-    } else { 
-        *old_owner = new_owner;
-        return ChangeOwnerResponse::Success;
-    }
+    META_INFO.with(|meta_info|{
+        if meta_info.borrow().owner != ic_cdk::caller() {
+            return ChangeOwnerResponse::MissingRights;
+        } else { 
+            meta_info.borrow_mut().owner = new_owner;
+            return ChangeOwnerResponse::Success;
+        }
+    })
 }
 
 #[query]
-pub async fn get_meta_info() -> &'static MetaInfo{
-    return storage::get::<MetaInfo>();
+pub async fn get_meta_info() -> MetaInfo{
+    return META_INFO.with(|meta_info|{
+        meta_info.borrow().clone()
+    });
 }
 
 #[query]
-pub async fn get_chunk(chunk_num: usize) -> Option<&'static Chunk>{
-    let chunks = storage::get::<Chunks>();
-    return chunks.get(chunk_num);
+pub async fn get_chunk(chunk_num: usize) -> Option<Chunk>{
+    return CHUNKS.with(|chunks|{
+        chunks.borrow().get(chunk_num).map(|chunk|
+            chunk.clone()
+        )
+    });
 }
 
 #[pre_upgrade]
 fn pre_upgrade() {
-    let pair = (storage::get::<MetaInfo>(), storage::get::<Chunks>());
-    storage::stable_save((pair,)).unwrap();
+    CHUNKS.with(|chunks|{
+        META_INFO.with(|meta_info|{
+            let pair = (meta_info, chunks);
+            storage::stable_save((pair,)).unwrap();
+        })
+    });
 }
 
 #[post_upgrade]
 fn post_upgrade() {
-    let ((old_meta_info, chunks),): ((MetaInfo, Chunks),) = storage::stable_restore().unwrap();
+    let ((old_meta_info, old_chunks),): ((MetaInfo, Chunks),) = storage::stable_restore().unwrap();
 
-    let meta_info = storage::get_mut::<MetaInfo>();
-    meta_info.chunk_num = old_meta_info.chunk_num;
-    meta_info.description = old_meta_info.description;
-    meta_info.owner = old_meta_info.owner;
-    meta_info.name = old_meta_info.name;
+    META_INFO.with(|wrapped_meta_info|{
+        let mut meta_info = wrapped_meta_info.borrow_mut();
+        meta_info.chunk_num = old_meta_info.chunk_num;
+        meta_info.description = old_meta_info.description;
+        meta_info.owner = old_meta_info.owner;
+        meta_info.name = old_meta_info.name;
+    });
 
-    *storage::get_mut::<Chunks>() = chunks;
+    CHUNKS.with(|chunks|{
+       *chunks.borrow_mut() = old_chunks;
+    });
 }

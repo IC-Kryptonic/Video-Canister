@@ -1,19 +1,33 @@
+require('dotenv').config();
+
 import { idlFactory as videoCanisterIdl } from './canisters/video_canister/videoCanister_idl.did';
 import { idlFactory as spawnCanisterIdl } from './canisters/spawn_canister/spawnCanister_idl.did';
 import { idlFactory as managementCanisterIdl } from './canisters/management_canister/managementCanister_idl.did';
 import { idlFactory as walletCanisterIdl } from './canisters/wallet_canister/walletCanister_idl.did';
 import { idlFactory as indexCanisterIdl } from './canisters/index_canister/indexCanister_idl.did';
+import { InternalStorageConfig } from './interfaces';
 
-// TODO adjust for mainnet
-export const SPAWN_PRINCIPAL_ID = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
-export const INDEX_PRINCIPAL_ID = 'rkp4c-7iaaa-aaaaa-aaaca-cai'
-
-// TODO adjust for mainnet
+export const SPAWN_PRINCIPAL_ID = 'yllyf-jqaaa-aaaal-qaz5q-cai';
+export const INDEX_PRINCIPAL_ID = 'ljn74-3iaaa-aaaaj-aekua-cai';
 export const MANAGEMENT_PRINCIPAL_ID = 'aaaaa-aa';
+
+export const IC0HOST = 'https://ic0.app';
 
 export const REQUIRED_CYCLES: bigint = BigInt(200_000_000_000);
 
-export const CHUNK_SIZE = 1024;
+export const CHUNK_SIZE = 100000;
+export const MIN_CHUNK_SIZE = 1000;
+export const MAX_CHUNK_SIZE = 2000000;
+export const UPLOAD_ATTEMPTS_PER_CHUNK = 3;
+
+export const DEFAULT_CONFIG: InternalStorageConfig = {
+  spawnCanisterPrincipalId: SPAWN_PRINCIPAL_ID,
+  indexCanisterPrincipalId: INDEX_PRINCIPAL_ID,
+  chunkSize: CHUNK_SIZE,
+  storeOnIndex: true,
+  uploadAttemptsPerChunk: UPLOAD_ATTEMPTS_PER_CHUNK,
+  host: IC0HOST,
+};
 
 export const enum CANISTER_TYPE {
   'VIDEO_CANISTER' = 'VIDEO_CANISTER',
@@ -23,7 +37,6 @@ export const enum CANISTER_TYPE {
   'INDEX_CANISTER' = 'INDEX_CANISTER',
 }
 
-// TODO define types for idls
 export const CANISTER_IDL_MAP = new Map<string, any>([
   [CANISTER_TYPE.MANAGEMENT_CANISTER, managementCanisterIdl],
   [CANISTER_TYPE.SPAWN_CANISTER, spawnCanisterIdl],

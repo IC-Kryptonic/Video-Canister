@@ -19,9 +19,9 @@ export const idlFactory = ({ IDL }) => {
     'success' : IDL.Null,
   });
   const PutMetaInfo = IDL.Record({
-    'name' : IDL.Text,
-    'description' : IDL.Text,
-    'chunk_num' : IDL.Nat64,
+    name: IDL.Opt(IDL.Text),
+    description: IDL.Opt(IDL.Text),
+    chunk_num: IDL.Opt(IDL.Nat64),
   });
   const PutMetaInfoResponse = IDL.Variant({
     'missing_rights' : IDL.Null,
