@@ -23,6 +23,11 @@ export declare class ICVideoStorage {
      */
     uploadVideo(input: UploadVideo): Promise<Principal>;
     /**
+     * Experimental: Calculates an estimate amount of required cycles for the uploadVideo function
+     * @param {number} fileSize size of the file buffer
+     */
+    calculateCycleEstimate(fileSize: number): BigInt;
+    /**
      * Retrieves video from video canister
      * @param {Principal} principal principal of the video canister
      */

@@ -78,6 +78,14 @@ class ICVideoStorage {
         return videoPrincipal;
     }
     /**
+     * Experimental: Calculates an estimate amount of required cycles for the uploadVideo function
+     * @param {number} fileSize size of the file buffer
+     */
+    calculateCycleEstimate(fileSize) {
+        const calculatedEstimate = BigInt(190000000000 + 1500 * Number(fileSize));
+        return calculatedEstimate < constants_1.REQUIRED_CYCLES ? constants_1.REQUIRED_CYCLES : calculatedEstimate;
+    }
+    /**
      * Retrieves video from video canister
      * @param {Principal} principal principal of the video canister
      */
