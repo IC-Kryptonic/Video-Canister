@@ -7,8 +7,8 @@ import { idlFactory as walletCanisterIdl } from './canisters/wallet_canister/wal
 import { idlFactory as indexCanisterIdl } from './canisters/index_canister/indexCanister_idl.did';
 import { InternalStorageConfig } from './interfaces';
 
-export const SPAWN_PRINCIPAL_ID = 'yllyf-jqaaa-aaaal-qaz5q-cai';
-export const INDEX_PRINCIPAL_ID = 'ljn74-3iaaa-aaaaj-aekua-cai';
+export const SPAWN_PRINCIPAL_ID = '3j2ht-uqaaa-aaaag-aaioq-cai';
+export const INDEX_PRINCIPAL_ID = '3azmp-cyaaa-aaaag-aaipa-cai';
 export const MANAGEMENT_PRINCIPAL_ID = 'aaaaa-aa';
 
 export const IC0HOST = 'https://ic0.app';

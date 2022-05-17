@@ -1,6 +1,6 @@
 {
   "name": "ic-video-storage",
-  "version": "0.1.22",
+  "version": "1.0.0",
   "description": "IC Video Storage",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",

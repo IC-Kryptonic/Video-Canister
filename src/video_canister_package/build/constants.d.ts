@@ -1,6 +1,6 @@
 import { InternalStorageConfig } from './interfaces';
-export declare const SPAWN_PRINCIPAL_ID = "yllyf-jqaaa-aaaal-qaz5q-cai";
-export declare const INDEX_PRINCIPAL_ID = "ljn74-3iaaa-aaaaj-aekua-cai";
+export declare const SPAWN_PRINCIPAL_ID = "3j2ht-uqaaa-aaaag-aaioq-cai";
+export declare const INDEX_PRINCIPAL_ID = "3azmp-cyaaa-aaaag-aaipa-cai";
 export declare const MANAGEMENT_PRINCIPAL_ID = "aaaaa-aa";
 export declare const IC0HOST = "https://ic0.app";
 export declare const REQUIRED_CYCLES: bigint;
