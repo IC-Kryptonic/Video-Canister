@@ -12,6 +12,15 @@ class ICVideoStorage {
         if (config)
             this.updateConfig(config);
     }
+    /**
+     * Updates storage config
+     * @param {number} [config.chunkSize] video chunk size
+     * @param {number} [config.uploadAttemptsPerChunk] maximum number of upload attempts per chunk
+     * @param {Boolean} [config.storeOnIndex] determines whether if created video canister principals are stored in the index canister
+     * @param {string} [config.indexCanisterPrincipalId] string representation of index canister principal
+     * @param {string} [config.spawnCanisterPrincipalId] string representation of spawn canister principal
+     * @param {string} [config.host] Internet Computer host
+     */
     updateConfig(config) {
         (0, parameter_check_1.checkUpdateConfigParams)(config);
         if (config.chunkSize !== undefined)
@@ -27,6 +36,13 @@ class ICVideoStorage {
         if (config.host)
             this.config.host = config.host;
     }
+    /**
+     * Creates new video canister and store video in it
+     * @param {Identity} input.identity caller's identity
+     * @param {Principal} input.walletId wallet owned by the caller to pay the cycles
+     * @param {Principal} input.video object with 'name', 'description' and 'videoBuffer'
+     * @param {BigInt} input.cycles amount of cycles for payment & transfer to the video canister
+     */
     async uploadVideo(input) {
         const { identity, walletId, video, cycles } = (0, parameter_check_1.checkUploadVideoParams)(input);
         if (cycles < constants_1.REQUIRED_CYCLES) {
@@ -61,6 +77,10 @@ class ICVideoStorage {
         }
         return videoPrincipal;
     }
+    /**
+     * Retrieves video from video canister
+     * @param {Principal} principal principal of the video canister
+     */
     async getVideo(principal) {
         (0, parameter_check_1.checkGetVideoParams)(principal);
         const httpAgent = await (0, common_1.getHttpAgent)(new agent_1.AnonymousIdentity(), this.config.host);
@@ -92,6 +112,14 @@ class ICVideoStorage {
             throw new Error('Unable to query video: ' + error);
         }
     }
+    /**
+     * Changes the owner of a video canister
+     * @param {Identity} input.oldIdentity caller's / current owner's identity
+     * @param {Principal} input.oldWallet caller's / current owner's wallet principal
+     * @param {Principal} input.videoPrincipal principal of the video canister
+     * @param {Principal} input.newOwner new owner's principal
+     * @param {Principal} input.newOwnerWallet new owner's wallet principal
+     */
     async changeOwner(input) {
         const { oldIdentity, oldWallet, videoPrincipal, newOwner, newOwnerWallet } = (0, parameter_check_1.checkChangeOwnerParams)(input);
         const httpAgent = await (0, common_1.getHttpAgent)(oldIdentity, this.config.host);
@@ -110,6 +138,13 @@ class ICVideoStorage {
             return optVideos[0];
         }
     }
+    /**
+     * Updates metadata in an already existing video canister
+     * @param {Identity} input.identity caller's identity
+     * @param {Principal} input.videoPrincipal principal of the video canister
+     * @param {string} input.newName new video name
+     * @param {string} input.newDescription new video description
+     */
     async updateMetadata(input) {
         const { identity, videoPrincipal, newName, newDescription } = (0, parameter_check_1.checkUpdateMetadataParams)(input);
         const httpAgent = await (0, common_1.getHttpAgent)(identity, this.config.host);
@@ -121,6 +156,13 @@ class ICVideoStorage {
             chunk_num: [],
         }), 'Could not put meta info into video canister');
     }
+    /**
+     * Updates video in an already existing video canister
+     * @param {Identity} input.identity caller's identity
+     * @param {Principal} input.videoPrincipal principal of the video canister
+     * @param {Buffer} input.newVideoBuffer the video buffer to put into the canister
+     * @param {number} input.newChunkNum the number of chunks (video length / chunk size)
+     */
     async updateVideo(input) {
         const { identity, videoPrincipal, newChunkNum, newVideoBuffer } = (0, parameter_check_1.checkUpdateVideoParams)(input);
         const httpAgent = await (0, common_1.getHttpAgent)(identity, this.config.host);
