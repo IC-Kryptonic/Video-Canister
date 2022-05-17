@@ -41,7 +41,7 @@ class ICVideoStorage {
      * @param {Identity} input.identity caller's identity
      * @param {Principal} input.walletId wallet owned by the caller to pay the cycles
      * @param {Principal} input.video object with 'name', 'description' and 'videoBuffer'
-     * @param {BigInt} input.cycles amount of cycles for payment & transfer to the video canister
+     * @param {bigint} input.cycles bigint amount of cycles for payment & transfer to the video canister
      */
     async uploadVideo(input) {
         const { identity, walletId, video, cycles } = (0, parameter_check_1.checkUploadVideoParams)(input);

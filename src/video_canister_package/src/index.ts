@@ -56,7 +56,7 @@ export class ICVideoStorage {
    * @param {Identity} input.identity caller's identity
    * @param {Principal} input.walletId wallet owned by the caller to pay the cycles
    * @param {Principal} input.video object with 'name', 'description' and 'videoBuffer'
-   * @param {BigInt} input.cycles amount of cycles for payment & transfer to the video canister
+   * @param {bigint} input.cycles bigint amount of cycles for payment & transfer to the video canister
    */
   async uploadVideo(input: UploadVideo): Promise<Principal> {
     const { identity, walletId, video, cycles } = checkUploadVideoParams(input);
@@ -109,7 +109,7 @@ export class ICVideoStorage {
    * Experimental: Calculates an estimate amount of required cycles for the uploadVideo function
    * @param {number} fileSize size of the file buffer
    */
-  calculateCycleEstimate(fileSize: number): BigInt {
+  calculateCycleEstimate(fileSize: number): bigint {
     const calculatedEstimate = BigInt(190000000000 + 1500 * Number(fileSize));
     return calculatedEstimate < REQUIRED_CYCLES ? REQUIRED_CYCLES : calculatedEstimate;
   }
