@@ -4,6 +4,8 @@ Storing data on a Blockchain causes costs that cannot be refunded. Please use th
 
 We do not warrant flawless functionality of this package and do not bear the reponsibility of any (financial) damage caused by using it.
 
+This package is published under the MIT license (see repository for details).
+
 # ic-video-storage
 
 JavaScript and TypeScript library to easily store and stream videos using the [Internet Computer](https://dfinity.org/).
